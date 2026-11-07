@@ -4,6 +4,8 @@
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <SolidColorBrush x:Key="BgDark" Color="#090B10"/>
+        <SolidColorBrush x:Key="BgSidebar" Color="#10131C"/>
+        <SolidColorBrush x:Key="BgFooter" Color="#0B0D14"/>
         <SolidColorBrush x:Key="CardDark" Color="#141824"/>
         <SolidColorBrush x:Key="CardDarkHover" Color="#1C2233"/>
         <SolidColorBrush x:Key="BorderDark" Color="#262B38"/>
@@ -15,21 +17,43 @@
         <SolidColorBrush x:Key="TextMuted" Color="#A1A1AA"/>
 
         <Style TargetType="Button">
-            <Setter Property="Background" Value="{StaticResource CardDark}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextWhite}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource BorderDark}"/>
+            <Setter Property="Background" Value="{DynamicResource CardDark}"/>
+            <Setter Property="Foreground" Value="{DynamicResource TextWhite}"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderDark}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Padding" Value="14,8"/>
             <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}"
+                        <Border x:Name="BtnBorder"
+                                Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="8">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                CornerRadius="8"
+                                Padding="{TemplateBinding Padding}"
+                                SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BtnBorder" Property="Opacity" Value="0.90"/>
+                                <Setter TargetName="BtnBorder" Property="BorderBrush" Value="{DynamicResource AccentCyan}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="BtnBorder" Property="Opacity" Value="0.78"/>
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="BtnBorder" Property="BorderBrush" Value="{DynamicResource AccentCyan}"/>
+                                <Setter TargetName="BtnBorder" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="BtnBorder" Property="Opacity" Value="0.42"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>

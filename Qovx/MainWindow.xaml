@@ -1,21 +1,22 @@
 <Window x:Class="Qovx.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="QOVX - Windows System &amp; Network Control Suite" Height="700" Width="1060"
+        Title="QOVX - Windows System &amp; Network Control Suite" Height="780" Width="1160"
         WindowStartupLocation="CenterScreen"
-        Background="{StaticResource BgDark}"
-        Foreground="{StaticResource TextWhite}"
+        Background="{DynamicResource BgDark}"
+        Foreground="{DynamicResource TextWhite}"
         FontFamily="Segoe UI"
-        MinWidth="920" MinHeight="620">
+        MinWidth="980" MinHeight="680">
 
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="64"/>
+            <RowDefinition Height="66"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="36"/>
+            <RowDefinition Height="38"/>
         </Grid.RowDefinitions>
 
-        <Border Grid.Row="0" Background="{StaticResource CardDark}" BorderBrush="{StaticResource BorderDark}" BorderThickness="0,0,0,1" Padding="20,0">
+        <!-- HEADER BAR -->
+        <Border Grid.Row="0" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,0,1" Padding="20,0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -24,62 +25,86 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border CornerRadius="8" Background="#0EA5E9" Width="36" Height="36" Margin="0,0,12,0">
+                    <Border CornerRadius="8" Background="#0EA5E9" Width="38" Height="38" Margin="0,0,12,0">
                         <TextBlock Text="QV" FontWeight="ExtraBold" FontSize="15" Foreground="#090B10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="QOVX" FontWeight="ExtraBold" FontSize="17" Foreground="{StaticResource TextWhite}"/>
-                        <TextBlock Text="System &amp; Network Control Suite v2.0.4" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                        <TextBlock Text="QOVX" FontWeight="ExtraBold" FontSize="17" Foreground="{DynamicResource TextWhite}"/>
+                        <TextBlock x:Name="TxtHeaderSubtitle" Text="System &amp; Network Control Suite v3.0.0" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
 
                 <Border Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center" Background="#122229" BorderBrush="#10B981" BorderThickness="1" CornerRadius="8" Padding="12,5">
-                    <TextBlock x:Name="TxtZeroTelemetry" Text="● %100 Çevrimdışı • Sıfır Telemetri" FontSize="11" FontWeight="SemiBold" Foreground="#10B981"/>
+                    <TextBlock x:Name="TxtZeroTelemetry" Text="● Sıfır Veri Toplama • Yalnızca Kullanıcı İsteğiyle DNS/Web" FontSize="11" FontWeight="SemiBold" Foreground="#10B981"/>
                 </Border>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button x:Name="BtnYouTube" Click="BtnYouTube_Click" Background="#E11D48" BorderBrush="#BE123C" BorderThickness="1" Margin="0,0,10,0" Padding="14,7">
-                        <TextBlock Text="ALLAHVERDİ CAN (YouTube)" FontWeight="Bold" FontSize="11" Foreground="#FFFFFF"/>
+                    <Button x:Name="BtnPinTop" Click="BtnPinTop_Click" Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource BorderDark}" Margin="0,0,8,0" Padding="10,7">
+                        <TextBlock x:Name="TxtPinTop" Text="📌 Üstte Tut: Kapalı" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource TextWhite}"/>
                     </Button>
 
-                    <Button x:Name="BtnLang" Click="BtnLang_Click" Background="{StaticResource CardDarkHover}" BorderBrush="{StaticResource AccentCyan}" Padding="12,7">
-                        <TextBlock x:Name="TxtLangLabel" Text="Dil: TR (EN'ye Geç)" FontWeight="Bold" FontSize="11" Foreground="{StaticResource AccentCyan}"/>
+                    <Button x:Name="BtnSoundToggle" Click="BtnSoundToggle_Click" Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource BorderDark}" Margin="0,0,8,0" Padding="10,7">
+                        <TextBlock x:Name="TxtSoundLabel" Text="🔊 Ses: Açık" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource TextWhite}"/>
+                    </Button>
+
+                    <Button x:Name="BtnThemeToggle" Click="BtnThemeToggle_Click" Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource BorderDark}" Margin="0,0,8,0" Padding="10,7">
+                        <TextBlock x:Name="TxtThemeLabel" Text="🌙 Tema: Koyu" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource TextWhite}"/>
+                    </Button>
+
+                    <Button x:Name="BtnLang" Click="BtnLang_Click" Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource AccentCyan}" Margin="0,0,8,0" Padding="12,7">
+                        <TextBlock x:Name="TxtLangLabel" Text="Dil: TR (EN'ye Geç)" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentCyan}"/>
+                    </Button>
+
+                    <Button x:Name="BtnYouTube" Click="BtnYouTube_Click" Background="#E11D48" BorderBrush="#BE123C" BorderThickness="1" Padding="12,7">
+                        <TextBlock x:Name="TxtBtnYouTube" Text="ALLAHVERDİ CAN (YouTube)" FontWeight="Bold" FontSize="11" Foreground="#FFFFFF"/>
                     </Button>
                 </StackPanel>
             </Grid>
         </Border>
 
+        <!-- BODY -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="235"/>
+                <ColumnDefinition Width="245"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <Border Grid.Column="0" Background="#10131C" BorderBrush="{StaticResource BorderDark}" BorderThickness="0,0,1,0" Padding="12,16">
+            <!-- SIDEBAR NAVIGATION -->
+            <Border Grid.Column="0" Background="{DynamicResource BgSidebar}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,1,0" Padding="12,16">
                 <StackPanel>
-                    <Button x:Name="NavDash" Click="Nav_Click" Tag="Dash" Background="{StaticResource CardDarkHover}" BorderBrush="{StaticResource AccentCyan}" Margin="0,0,0,6" HorizontalContentAlignment="Left" Padding="12,10">
+                    <Button x:Name="NavDash" Click="Nav_Click" Tag="Dash" Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource AccentCyan}" Margin="0,0,0,6" HorizontalContentAlignment="Left" Padding="12,10">
                         <TextBlock x:Name="NavTxtDash" Text="Sistem Özeti &amp; Hızlandır" FontWeight="SemiBold" FontSize="13"/>
                     </Button>
                     <Button x:Name="NavRam" Click="Nav_Click" Tag="Ram" Background="Transparent" BorderThickness="0" Margin="0,0,0,6" HorizontalContentAlignment="Left" Padding="12,10">
-                        <TextBlock x:Name="NavTxtRam" Text="Bellek (RAM) Yönetimi" FontSize="13" Foreground="{StaticResource TextMuted}"/>
+                        <TextBlock x:Name="NavTxtRam" Text="Bellek (RAM) Yönetimi" FontSize="13" Foreground="{DynamicResource TextMuted}"/>
                     </Button>
                     <Button x:Name="NavDisk" Click="Nav_Click" Tag="Disk" Background="Transparent" BorderThickness="0" Margin="0,0,0,6" HorizontalContentAlignment="Left" Padding="12,10">
-                        <TextBlock x:Name="NavTxtDisk" Text="Disk &amp; Kopya Temizleyici" FontSize="13" Foreground="{StaticResource TextMuted}"/>
+                        <TextBlock x:Name="NavTxtDisk" Text="Disk &amp; Kopya Temizleyici" FontSize="13" Foreground="{DynamicResource TextMuted}"/>
                     </Button>
                     <Button x:Name="NavNet" Click="Nav_Click" Tag="Net" Background="Transparent" BorderThickness="0" Margin="0,0,0,6" HorizontalContentAlignment="Left" Padding="12,10">
-                        <TextBlock x:Name="NavTxtNet" Text="Ağ, DNS &amp; Gecikme" FontSize="13" Foreground="{StaticResource TextMuted}"/>
+                        <TextBlock x:Name="NavTxtNet" Text="Ağ, DNS &amp; Gecikme" FontSize="13" Foreground="{DynamicResource TextMuted}"/>
                     </Button>
                     <Button x:Name="NavPriv" Click="Nav_Click" Tag="Priv" Background="Transparent" BorderThickness="0" Margin="0,0,0,6" HorizontalContentAlignment="Left" Padding="12,10">
-                        <TextBlock x:Name="NavTxtPriv" Text="Gizlilik &amp; Telemetri" FontSize="13" Foreground="{StaticResource TextMuted}"/>
+                        <TextBlock x:Name="NavTxtPriv" Text="Gizlilik &amp; Başlangıç" FontSize="13" Foreground="{DynamicResource TextMuted}"/>
                     </Button>
                     <Button x:Name="NavStart" Click="Nav_Click" Tag="Start" Background="Transparent" BorderThickness="0" Margin="0,0,0,6" HorizontalContentAlignment="Left" Padding="12,10">
-                        <TextBlock x:Name="NavTxtStart" Text="Güç, Uyku Kilidi &amp; Araçlar" FontSize="13" Foreground="{StaticResource TextMuted}"/>
+                        <TextBlock x:Name="NavTxtStart" Text="Güç, Uyku Kilidi &amp; Araçlar" FontSize="13" Foreground="{DynamicResource TextMuted}"/>
                     </Button>
+
+                    <Border Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,18,0,0">
+                        <StackPanel>
+                            <TextBlock x:Name="TxtSysHealthLabel" Text="Kullanılabilir Bellek Oranı" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                            <TextBlock x:Name="ValHealthScore" Text="Ölçülüyor..." FontSize="19" FontWeight="ExtraBold" Foreground="{DynamicResource AccentEmerald}" Margin="0,4,0,4"/>
+                            <TextBlock x:Name="TxtUptimeInfo" Text="Çalışma Süresi: Hesaplanıyor..." FontSize="11" Foreground="{DynamicResource TextMuted}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
             </Border>
 
-            <Grid Grid.Column="1" Margin="24">
+            <!-- MAIN CONTENT AREA -->
+            <Grid Grid.Column="1" Margin="24,18,24,18">
 
+                <!-- TAB 1: DASHBOARD -->
                 <Grid x:Name="TabDash" Visibility="Visible">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -87,164 +112,312 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Row="0" Margin="0,0,0,20">
-                        <TextBlock x:Name="TxtDashTitle" Text="Sistem Performans &amp; Kontrol Paneli" FontSize="20" FontWeight="Bold" Foreground="{StaticResource TextWhite}"/>
-                        <TextBlock x:Name="TxtDashSubtitle" Text="Gerçek donanım verilerini yerel olarak inceleyin ve tek adımla sistem bakımını çalıştırın." FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,4,0,0"/>
+                    <StackPanel Grid.Row="0" Margin="0,0,0,16">
+                        <TextBlock x:Name="TxtDashTitle" Text="Sistem Performans &amp; Kontrol Paneli" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextWhite}"/>
+                        <TextBlock x:Name="TxtDashSubtitle" Text="Gerçek donanım verilerini yerel olarak inceleyin ve güvenli sistem bakımını çalıştırın." FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,4,0,0"/>
                     </StackPanel>
 
-                    <Grid Grid.Row="1" Margin="0,0,0,24">
+                    <Grid Grid.Row="1" Margin="0,0,0,18">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Border Grid.Column="0" Background="{StaticResource CardDark}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,10,0">
+                        <Border Grid.Column="0" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,8,0">
                             <StackPanel>
-                                <TextBlock x:Name="CardTxtRam" Text="Fiziksel Bellek Yükü" FontSize="11" Foreground="{StaticResource TextMuted}"/>
-                                <TextBlock x:Name="ValRamPercent" Text="64%" FontSize="26" FontWeight="Bold" Foreground="{StaticResource AccentCyan}" Margin="0,6,0,0"/>
-                                <TextBlock x:Name="ValRamBytes" Text="Hesaplanıyor..." FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
+                                <TextBlock x:Name="CardTxtRam" Text="Fiziksel Bellek Yükü" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                                <TextBlock x:Name="ValRamPercent" Text="--" FontSize="26" FontWeight="Bold" Foreground="{DynamicResource AccentCyan}" Margin="0,6,0,0"/>
+                                <TextBlock x:Name="ValRamBytes" Text="Hesaplanıyor..." FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Border>
 
-                        <Border Grid.Column="1" Background="{StaticResource CardDark}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="5,0,5,0">
+                        <Border Grid.Column="1" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="4,0,4,0">
                             <StackPanel>
-                                <TextBlock x:Name="CardTxtTrash" Text="Temizlenebilir Önbellek" FontSize="11" Foreground="{StaticResource TextMuted}"/>
-                                <TextBlock x:Name="ValTempSize" Text="Taranıyor..." FontSize="26" FontWeight="Bold" Foreground="{StaticResource AccentAmber}" Margin="0,6,0,0"/>
-                                <TextBlock x:Name="ValTempDesc" Text="%TEMP% ve Shader dizinleri" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
+                                <TextBlock x:Name="CardTxtTrash" Text="Mevcut Geçici Önbellek" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                                <TextBlock x:Name="ValTempSize" Text="Taranıyor..." FontSize="26" FontWeight="Bold" Foreground="{DynamicResource AccentAmber}" Margin="0,6,0,0"/>
+                                <TextBlock x:Name="ValTempDesc" Text="%TEMP%, Tarayıcı ve Shader Önbelleği" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Border>
 
-                        <Border Grid.Column="2" Background="{StaticResource CardDark}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="10,0,0,0">
+                        <Border Grid.Column="2" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="8,0,0,0">
                             <StackPanel>
-                                <TextBlock x:Name="CardTxtDns" Text="Aktif DNS Yanıt Süresi" FontSize="11" Foreground="{StaticResource TextMuted}"/>
-                                <TextBlock x:Name="ValDnsPing" Text="11 ms" FontSize="26" FontWeight="Bold" Foreground="{StaticResource AccentEmerald}" Margin="0,6,0,0"/>
-                                <TextBlock x:Name="ValDnsProvider" Text="Primary Edge (1.1.1.1)" FontSize="11" Foreground="{StaticResource TextMuted}" Margin="0,2,0,0"/>
+                                <TextBlock x:Name="CardTxtDns" Text="Gerçek DNS Sorgu Medyanı" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                                <TextBlock x:Name="ValDnsPing" Text="Ölçülmedi" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource AccentEmerald}" Margin="0,6,0,0"/>
+                                <TextBlock x:Name="ValDnsProvider" Text="Test için Ağ sekmesini kullanın" FontSize="11" Foreground="{DynamicResource TextMuted}" Margin="0,2,0,0"/>
                             </StackPanel>
                         </Border>
                     </Grid>
 
-                    <Border Grid.Row="2" Background="{StaticResource CardDark}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="12" Padding="32">
+                    <Border Grid.Row="2" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="12" Padding="26">
                         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Button x:Name="BtnMasterBoost" Click="BtnMasterBoost_Click" Background="{StaticResource AccentCyan}" BorderThickness="0" Padding="36,16" Cursor="Hand">
-                                <TextBlock x:Name="TxtBtnMaster" Text="SİSTEM OPTİMİZASYONUNU BAŞLAT" FontSize="15" FontWeight="Bold" Foreground="#090B10"/>
+                            <Button x:Name="BtnMasterBoost" Click="BtnMasterBoost_Click" Background="{DynamicResource AccentCyan}" BorderThickness="0" Padding="36,16">
+                                <TextBlock x:Name="TxtBtnMaster" Text="HIZLI BAKIM VE ÖNBELLEK TEMİZLİĞİNİ BAŞLAT" FontSize="15" FontWeight="Bold" Foreground="#090B10"/>
                             </Button>
-                            <TextBlock x:Name="TxtBoostStatus" Text="Boştaki RAM çalışma kümeleri daraltılır, önbellek dizinleri silinir ve DNS sıfırlanır." HorizontalAlignment="Center" Margin="0,16,0,0" FontSize="12" Foreground="{StaticResource TextMuted}"/>
-                            <ProgressBar x:Name="PbBoost" Height="6" Width="380" Visibility="Collapsed" Margin="0,12,0,0" Foreground="{StaticResource AccentCyan}" Background="{StaticResource BorderDark}"/>
+                            <TextBlock x:Name="TxtBoostStatus" Text="Kritik sistem süreçlerini koruyarak kullanıcı süreçlerinin çalışma kümelerini daraltır, kilitsiz %TEMP% dosyalarını siler ve DNS önbelleğini sıfırlar." HorizontalAlignment="Center" Margin="0,14,0,0" FontSize="12" Foreground="{DynamicResource TextMuted}" TextWrapping="Wrap" TextAlignment="Center"/>
+                            <ProgressBar x:Name="PbBoost" Height="6" Width="400" Visibility="Collapsed" Margin="0,12,0,0" Foreground="{DynamicResource AccentCyan}" Background="{DynamicResource BorderDark}"/>
+                            <TextBlock x:Name="TxtHardwareSummary" Text="" HorizontalAlignment="Center" Margin="0,14,0,0" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                         </StackPanel>
                     </Border>
                 </Grid>
 
+                <!-- TAB 2: RAM MANAGEMENT & TOP PROCESSES -->
                 <Grid x:Name="TabRam" Visibility="Collapsed">
-                    <StackPanel>
-                        <TextBlock x:Name="TxtRamTitle" Text="Bellek (RAM) Çalışma Kümesi Yönetimi" FontSize="20" FontWeight="Bold"/>
-                        <TextBlock x:Name="TxtRamSubtitle" Text="Windows EmptyWorkingSet API çağrısı ile açık uygulamaları kapatmadan pasif bellek bloklarını boşaltır." FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,4,0,20"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                        <Border Background="{StaticResource CardDark}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="24" Margin="0,0,0,16">
-                            <StackPanel>
-                                <TextBlock x:Name="TxtLiveRam" Text="Canlı Fiziksel Bellek Durumu:" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,8"/>
-                                <TextBlock x:Name="TxtRamDetail" Text="Okunuyor..." FontSize="13" Foreground="{StaticResource AccentCyan}" Margin="0,0,0,14"/>
-                                <CheckBox x:Name="ChkAutoRam" Content="Bellek yükü %82'yi aştığında otomatik boşalt" IsChecked="True" Foreground="{StaticResource TextWhite}" Margin="0,0,0,16"/>
-                                <Button x:Name="BtnPurgeRam" Click="BtnPurgeRam_Click" Background="{StaticResource AccentCyan}" BorderThickness="0" Padding="20,10" HorizontalAlignment="Left">
-                                    <TextBlock x:Name="TxtBtnPurgeRam" Text="Bellek Çalışma Kümesini Şimdi Boşalt" FontWeight="Bold" Foreground="#090B10"/>
-                                </Button>
-                            </StackPanel>
-                        </Border>
+                    <StackPanel Grid.Row="0">
+                        <TextBlock x:Name="TxtRamTitle" Text="Güvenli Bellek (RAM) Çalışma Kümesi Yönetimi" FontSize="20" FontWeight="Bold"/>
+                        <TextBlock x:Name="TxtRamSubtitle" Text="Not: EmptyWorkingSet fiziksel RAM üretmez; kullanıcı uygulamalarının pasif bellek sayfalarını çalışma kümesinden daraltır. Oturum-0 ve çekirdek süreçleri korunur." FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,4,0,14"/>
                     </StackPanel>
+
+                    <Border Grid.Row="1" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="18" Margin="0,0,0,12">
+                        <StackPanel>
+                            <TextBlock x:Name="TxtLiveRam" Text="Canlı Fiziksel Bellek Durumu:" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,4"/>
+                            <TextBlock x:Name="TxtRamDetail" Text="Okunuyor..." FontSize="13" Foreground="{DynamicResource AccentCyan}" Margin="0,0,0,6"/>
+                            <TextBlock x:Name="TxtRamLastReport" Text="Son İşlem: Henüz çalışma kümesi daraltma işlemi çalıştırılmadı." FontSize="12" Foreground="{DynamicResource AccentEmerald}" Margin="0,0,0,10" TextWrapping="Wrap"/>
+                            <CheckBox x:Name="ChkAutoRam" Content="Bellek yükü %88'i aştığında otomatik daralt (İsteğe Bağlı • 5 dk soğuma süreli)" IsChecked="False" Foreground="{DynamicResource TextWhite}" Margin="0,0,0,12"/>
+                            <WrapPanel>
+                                <Button x:Name="BtnPurgeRam" Click="BtnPurgeRam_Click" Background="{DynamicResource AccentCyan}" BorderThickness="0" Padding="18,9" Margin="0,0,10,6">
+                                    <TextBlock x:Name="TxtBtnPurgeRam" Text="Kullanıcı Süreçlerinin Çalışma Kümesini Daralt" FontWeight="Bold" Foreground="#090B10"/>
+                                </Button>
+                                <Button x:Name="BtnRefreshProc" Click="BtnRefreshProc_Click" Background="{DynamicResource CardDarkHover}" Padding="14,9" Margin="0,0,10,6">
+                                    <TextBlock x:Name="TxtBtnRefreshProc" Text="Süreç Listesini Yenile" FontWeight="SemiBold"/>
+                                </Button>
+                                <Button x:Name="BtnTrimSelectedProc" Click="BtnTrimSelectedProc_Click" Background="{DynamicResource AccentEmerald}" BorderThickness="0" Padding="14,9" Margin="0,0,0,6">
+                                    <TextBlock x:Name="TxtBtnTrimSelectedProc" Text="Seçili Sürecin Çalışma Kümesini Daralt" FontWeight="Bold" Foreground="#090B10"/>
+                                </Button>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="2" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="14">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock x:Name="TxtTopProcHeader" Grid.Row="0" Text="En Çok Bellek Tüketen Aktif Süreçler (İlk 15 • PID ve Başlangıç Zamanı Doğrulamalı)" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,8"/>
+                            <ListBox x:Name="LstTopProcesses" Grid.Row="1" Background="#0D1017" Foreground="{DynamicResource TextWhite}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
+                        </Grid>
+                    </Border>
                 </Grid>
 
+                <!-- TAB 3: DISK & SHA-256 DUPLICATE CLEANER -->
                 <Grid x:Name="TabDisk" Visibility="Collapsed">
-                    <StackPanel>
-                        <TextBlock x:Name="TxtDiskTitle" Text="Depolama Temizliği &amp; SHA-256 Kopya Dosya Tarayıcı" FontSize="20" FontWeight="Bold"/>
-                        <TextBlock x:Name="TxtDiskSubtitle" Text="Geçici sistem dosyalarını, DirectX Shader önbelleğini ve birebir aynı kopya dosyaları temizleyin." FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,4,0,20"/>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
 
-                        <Border Background="{StaticResource CardDark}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="20" Margin="0,0,0,16">
+                    <StackPanel Grid.Row="0">
+                        <TextBlock x:Name="TxtDiskTitle" Text="Depolama Temizliği &amp; Doğrulamalı SHA-256 Kopya Yöneticisi" FontSize="20" FontWeight="Bold"/>
+                        <TextBlock x:Name="TxtDiskSubtitle" Text="Sembolik bağlantıları (Junction/Symlink) atlayarak önbellekleri temizler; kopya dosyaları yeniden doğrulayıp Geri Dönüşüm Kutusu'na taşır." FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,4,0,12"/>
+                    </StackPanel>
+
+                    <!-- 3 SEPARATE ACCURATE DISK METRICS (Section 19.2) -->
+                    <Grid Grid.Row="1" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,0,6,0">
                             <StackPanel>
-                                <CheckBox x:Name="ChkUserTemp" Content="Kullanıcı Geçici Dizinleri (%TEMP%)" IsChecked="True" Foreground="{StaticResource TextWhite}" Margin="0,0,0,10"/>
-                                <CheckBox x:Name="ChkWinTemp" Content="Windows Sistem Geçici Dizinleri (C:\Windows\Temp)" IsChecked="True" Foreground="{StaticResource TextWhite}" Margin="0,0,0,10"/>
-                                <CheckBox x:Name="ChkUpdateCache" Content="İndirilenler Klasörü SHA-256 Kopya Dosya Analizi" IsChecked="True" Foreground="{StaticResource TextWhite}" Margin="0,0,0,10"/>
-                                <CheckBox x:Name="ChkThumbnails" Content="DirectX Gölgelendirici (D3DSCache) Önbelleği" IsChecked="True" Foreground="{StaticResource TextWhite}" Margin="0,0,0,16"/>
-
-                                <StackPanel Orientation="Horizontal">
-                                    <Button x:Name="BtnScanDisk" Click="BtnScanDisk_Click" Background="{StaticResource CardDarkHover}" Margin="0,0,10,0">
-                                        <TextBlock x:Name="TxtBtnScanDisk" Text="Önbellek ve Kopyaları Tara" FontWeight="SemiBold"/>
-                                    </Button>
-                                    <Button x:Name="BtnCleanDisk" Click="BtnCleanDisk_Click" Background="{StaticResource AccentAmber}" BorderThickness="0">
-                                        <TextBlock x:Name="TxtBtnCleanDisk" Text="Seçili Önbellekleri Temizle" FontWeight="Bold" Foreground="#090B10"/>
-                                    </Button>
-                                </StackPanel>
-                                <TextBlock x:Name="TxtDiskResult" Text="" Margin="0,12,0,0" FontSize="12" Foreground="{StaticResource AccentEmerald}"/>
+                                <TextBlock x:Name="LblMetricCache" Text="1. Mevcut Önbellek Boyutu" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                                <TextBlock x:Name="TxtMetricCurrentCache" Text="0.0 MB" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentAmber}" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
-                    </StackPanel>
-                </Grid>
-
-                <Grid x:Name="TabNet" Visibility="Collapsed">
-                    <StackPanel>
-                        <TextBlock x:Name="TxtNetTitle" Text="Ağ Tanılama, DNS Kıyaslama &amp; Soket Onarımı" FontSize="20" FontWeight="Bold"/>
-                        <TextBlock x:Name="TxtNetSubtitle" Text="Genel DNS çözümleyicilerine canlı ICMP ping testi yapın ve DNS/ARP önbelleğini sıfırlayın." FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,4,0,20"/>
-
-                        <Border Background="{StaticResource CardDark}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="20" Margin="0,0,0,16">
+                        <Border Grid.Column="1" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="3,0,3,0">
                             <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
-                                    <Button x:Name="BtnTestPing" Click="BtnTestPing_Click" Background="{StaticResource AccentCyan}" BorderThickness="0" Margin="0,0,10,0">
-                                        <TextBlock x:Name="TxtBtnTestPing" Text="Canlı DNS Gecikme Testini Başlat" FontWeight="Bold" Foreground="#090B10"/>
-                                    </Button>
-                                    <Button x:Name="BtnFlushDns" Click="BtnFlushDns_Click" Background="{StaticResource CardDarkHover}">
-                                        <TextBlock x:Name="TxtBtnFlushDns" Text="DNS ve ARP Önbelleğini Temizle" FontWeight="SemiBold"/>
-                                    </Button>
-                                </StackPanel>
-
-                                <TextBlock x:Name="TxtPingResults" Text="Henüz test çalıştırılmadı." TextWrapping="Wrap" FontSize="13" Foreground="{StaticResource TextWhite}"/>
+                                <TextBlock x:Name="LblMetricFreed" Text="2. Gerçekten Silinen Alan" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                                <TextBlock x:Name="TxtMetricFreedSpace" Text="0.0 MB (0 dosya)" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentEmerald}" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
-                    </StackPanel>
-                </Grid>
-
-                <Grid x:Name="TabPriv" Visibility="Collapsed">
-                    <StackPanel>
-                        <TextBlock x:Name="TxtPrivTitle" Text="Gizlilik Ayarları &amp; Telemetri Sınırlandırma" FontSize="20" FontWeight="Bold"/>
-                        <TextBlock x:Name="TxtPrivSubtitle" Text="Kayıt defteri üzerinden reklam kimliği takibini, web arama sorgularını ve arka plan kaydını kapatın." FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,4,0,20"/>
-
-                        <Border Background="{StaticResource CardDark}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="20">
+                        <Border Grid.Column="2" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="6,0,0,0">
                             <StackPanel>
-                                <CheckBox x:Name="ChkAdId" Content="Reklam Kimliği (AdvertisingInfo) Takibini Devre Dışı Bırak" IsChecked="True" Foreground="{StaticResource TextWhite}" Margin="0,0,0,12"/>
-                                <CheckBox x:Name="ChkDiagnostic" Content="Arka Plan Oyun Kaydı (GameDVR) Yükünü Kapat" IsChecked="True" Foreground="{StaticResource TextWhite}" Margin="0,0,0,12"/>
-                                <CheckBox x:Name="ChkStartWeb" Content="Başlat Menüsü Web Arama Sorgularını Kapat" IsChecked="True" Foreground="{StaticResource TextWhite}" Margin="0,0,0,16"/>
+                                <TextBlock x:Name="LblMetricDup" Text="3. Kopya Dosya Potansiyel Kazancı" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                                <TextBlock x:Name="TxtMetricDupPotential" Text="0.0 MB (0 kopya)" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentCyan}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
 
-                                <Button x:Name="BtnApplyPrivacy" Click="BtnApplyPrivacy_Click" Background="{StaticResource AccentEmerald}" BorderThickness="0" HorizontalAlignment="Left">
-                                    <TextBlock x:Name="TxtBtnApplyPrivacy" Text="Kayıt Defteri Gizlilik Kurallarını Uygula" FontWeight="Bold" Foreground="#090B10"/>
+                    <Border Grid.Row="2" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="16" Margin="0,0,0,12">
+                        <StackPanel>
+                            <WrapPanel Margin="0,0,0,10">
+                                <CheckBox x:Name="ChkUserTemp" Content="Kullanıcı Geçici Dizinleri (%TEMP%)" IsChecked="True" Foreground="{DynamicResource TextWhite}" Margin="0,0,18,6"/>
+                                <CheckBox x:Name="ChkWinTemp" Content="Windows Temp Dizini (Yönetici İzni Gerekebilir)" IsChecked="False" Foreground="{DynamicResource TextWhite}" Margin="0,0,18,6"/>
+                                <CheckBox x:Name="ChkUpdateCache" Content="İndirilenler &amp; Belgeler SHA-256 Kopya Taraması" IsChecked="True" Foreground="{DynamicResource TextWhite}" Margin="0,0,18,6"/>
+                                <CheckBox x:Name="ChkThumbnails" Content="DirectX Shader (D3DSCache) Önbelleği" IsChecked="True" Foreground="{DynamicResource TextWhite}" Margin="0,0,18,6"/>
+                                <CheckBox x:Name="ChkBrowserCache" Content="Tarayıcı Önbellekleri (Yalnızca Kapalıysa Temizlenir)" IsChecked="True" Foreground="{DynamicResource TextWhite}" Margin="0,0,18,6"/>
+                            </WrapPanel>
+
+                            <WrapPanel>
+                                <Button x:Name="BtnScanDisk" Click="BtnScanDisk_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,8,6">
+                                    <TextBlock x:Name="TxtBtnScanDisk" Text="Önizleme ve Kopyaları Tara" FontWeight="SemiBold"/>
                                 </Button>
-                                <TextBlock x:Name="TxtPrivResult" Text="" Margin="0,12,0,0" FontSize="12" Foreground="{StaticResource AccentEmerald}"/>
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
+                                <Button x:Name="BtnSelectDupFolder" Click="BtnSelectDupFolder_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,8,6">
+                                    <TextBlock x:Name="TxtBtnSelectDupFolder" Text="Özel Klasör Seç &amp; Kopya Ara" FontWeight="SemiBold"/>
+                                </Button>
+                                <Button x:Name="BtnCleanDisk" Click="BtnCleanDisk_Click" Background="{DynamicResource AccentAmber}" BorderThickness="0" Margin="0,0,8,6">
+                                    <TextBlock x:Name="TxtBtnCleanDisk" Text="Seçili Önbellekleri Temizle" FontWeight="Bold" Foreground="#090B10"/>
+                                </Button>
+                                <Button x:Name="BtnCancelDiskOp" Click="BtnCancelDiskOp_Click" Background="{DynamicResource CardDarkHover}" IsEnabled="False" Margin="0,0,8,6">
+                                    <TextBlock x:Name="TxtBtnCancelDiskOp" Text="İşlemi Durdur" FontWeight="SemiBold"/>
+                                </Button>
+                                <Button x:Name="BtnDeleteSelectedDup" Click="BtnDeleteSelectedDup_Click" Background="#E11D48" BorderThickness="0" Margin="0,0,0,6">
+                                    <TextBlock x:Name="TxtBtnDeleteSelectedDup" Text="Seçili Kopyayı Doğrula &amp; Geri Dönüşüme Gönder" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                </Button>
+                            </WrapPanel>
+                            <TextBlock x:Name="TxtDiskResult" Text="" Margin="0,6,0,0" FontSize="12" Foreground="{DynamicResource AccentEmerald}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="3" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="14">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock x:Name="TxtDupListHeader" Grid.Row="0" Text="Tespit Edilen SHA-256 Kopya Dosyalar (Kopya Konumu ➔ Orijinal Dosya Konumu)" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
+                            <ListBox x:Name="LstDuplicates" Grid.Row="1" Background="#0D1017" Foreground="{DynamicResource TextWhite}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
+                        </Grid>
+                    </Border>
                 </Grid>
 
+                <!-- TAB 4: NETWORK, DNS BENCHMARK & SOCKET REPAIR -->
+                <Grid x:Name="TabNet" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <TextBlock x:Name="TxtNetTitle" Text="Ağ Tanılama, Çoklu Örneklem UDP/TCP DNS Kıyaslama &amp; Onarım" FontSize="20" FontWeight="Bold"/>
+                        <TextBlock x:Name="TxtNetSubtitle" Text="Rastgele Transaction ID, QR/RCODE/Soru doğrulaması ve TCP/53 yedeklemesiyle 3'er örneklem üzerinden Min/Medyan/Maks DNS gecikmesini ölçün." FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,4,0,16"/>
+                    </StackPanel>
+
+                    <Border Grid.Row="1" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="18" Margin="0,0,0,14">
+                        <StackPanel>
+                            <WrapPanel Margin="0,0,0,12">
+                                <Button x:Name="BtnTestPing" Click="BtnTestPing_Click" Background="{DynamicResource AccentCyan}" BorderThickness="0" Margin="0,0,10,6">
+                                    <TextBlock x:Name="TxtBtnTestPing" Text="Çoklu Örneklem DNS &amp; ICMP Testini Başlat" FontWeight="Bold" Foreground="#090B10"/>
+                                </Button>
+                                <Button x:Name="BtnFlushDns" Click="BtnFlushDns_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,10,6">
+                                    <TextBlock x:Name="TxtBtnFlushDns" Text="DNS ve ARP Önbelleğini Sıfırla" FontWeight="SemiBold"/>
+                                </Button>
+                                <Button x:Name="BtnResetWinsock" Click="BtnResetWinsock_Click" Background="{DynamicResource AccentEmerald}" BorderThickness="0" Margin="0,0,0,6">
+                                    <TextBlock x:Name="TxtBtnResetWinsock" Text="Winsock &amp; TCP/IP Sıfırla (Yönetici)" FontWeight="Bold" Foreground="#090B10"/>
+                                </Button>
+                            </WrapPanel>
+
+                            <TextBlock x:Name="TxtPingResults" Text="Henüz test çalıştırılmadı." TextWrapping="Wrap" FontSize="12" FontFamily="Consolas" Foreground="{DynamicResource TextWhite}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="2" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock x:Name="TxtAdapterHeader" Grid.Row="0" Text="Aktif Ağ Adaptörleri, Yerel IPv4, DNS Sunucuları ve Ağ Geçidi Bilgileri" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,8"/>
+                            <ListBox x:Name="LstNetAdapters" Grid.Row="1" Background="#0D1017" Foreground="{DynamicResource TextWhite}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- TAB 5: STATE-PRESERVING REVERSIBLE PRIVACY & STARTUP INSPECTOR -->
+                <Grid x:Name="TabPriv" Visibility="Collapsed">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <TextBlock x:Name="TxtPrivTitle" Text="Durum Yedeklemeli Gizlilik Ayarları &amp; Başlangıç Denetçisi" FontSize="20" FontWeight="Bold"/>
+                        <TextBlock x:Name="TxtPrivSubtitle" Text="Değişiklik öncesi mevcut Registry değerleriniz yerel JSON yedeğine kaydedilir; geri alma işlemi önceki kişisel ayarlarınızı birebir geri yükler." FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,4,0,16"/>
+                    </StackPanel>
+
+                    <Border Grid.Row="1" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="18" Margin="0,0,0,14">
+                        <StackPanel>
+                            <CheckBox x:Name="ChkAdId" Content="Reklam Kimliği Takibini Kapat (HKCU\...\AdvertisingInfo -> Enabled = 0)" IsChecked="True" Foreground="{DynamicResource TextWhite}" Margin="0,0,0,10"/>
+                            <CheckBox x:Name="ChkDiagnostic" Content="Xbox GameDVR Arka Plan Oyun/Ekran Kaydını Kapat (GameDVR_Enabled &amp; AppCaptureEnabled = 0)" IsChecked="True" Foreground="{DynamicResource TextWhite}" Margin="0,0,0,10"/>
+                            <CheckBox x:Name="ChkStartWeb" Content="Başlat Menüsü Bing Web Arama Önerilerini Kapat (DisableSearchBoxSuggestions = 1)" IsChecked="True" Foreground="{DynamicResource TextWhite}" Margin="0,0,0,10"/>
+                            <CheckBox x:Name="ChkTelemetryTailored" Content="Tanılama Verisiyle Kişiselleştirilmiş İpuçlarını Kapat (TailoredExperiencesWithDiagnosticDataEnabled = 0)" IsChecked="True" Foreground="{DynamicResource TextWhite}" Margin="0,0,0,14"/>
+
+                            <WrapPanel>
+                                <Button x:Name="BtnApplyPrivacy" Click="BtnApplyPrivacy_Click" Background="{DynamicResource AccentEmerald}" BorderThickness="0" Margin="0,0,10,6">
+                                    <TextBlock x:Name="TxtBtnApplyPrivacy" Text="Yedekle ve Seçili Gizlilik Kurallarını Uygula" FontWeight="Bold" Foreground="#090B10"/>
+                                </Button>
+                                <Button x:Name="BtnRevertPrivacy" Click="BtnRevertPrivacy_Click" Background="{DynamicResource AccentAmber}" BorderThickness="0" Margin="0,0,10,6">
+                                    <TextBlock x:Name="TxtBtnRevertPrivacy" Text="Kaydedilen Önceki Kullanıcı Durumuna Geri Yükle" FontWeight="Bold" Foreground="#090B10"/>
+                                </Button>
+                                <Button x:Name="BtnRefreshStartup" Click="BtnRefreshStartup_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,0,6">
+                                    <TextBlock x:Name="TxtBtnRefreshStartup" Text="Başlangıç Listesini Yenile" FontWeight="SemiBold"/>
+                                </Button>
+                            </WrapPanel>
+                            <TextBlock x:Name="TxtPrivResult" Text="" Margin="0,8,0,0" FontSize="12" Foreground="{DynamicResource AccentEmerald}" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Grid.Row="2" Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="16">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock x:Name="TxtStartupListHeader" Grid.Row="0" Text="Salt Okunur Başlangıç Denetimi (HKCU/HKLM Run, RunOnce ve Startup Klasörleri)" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,8"/>
+                            <ListBox x:Name="LstStartupApps" Grid.Row="1" Background="#0D1017" Foreground="{DynamicResource TextWhite}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- TAB 6: POWER PLANS, CAFFEINE LOCK & TIMERS -->
                 <Grid x:Name="TabStart" Visibility="Collapsed">
                     <StackPanel>
-                        <TextBlock x:Name="TxtStartTitle" Text="Güç Planları, Uyku Kilidi &amp; Zamanlayıcı" FontSize="20" FontWeight="Bold"/>
-                        <TextBlock x:Name="TxtStartSubtitle" Text="Nihai Performans güç şemasını açın, uyku kilidini başlatın veya otomatik kapatma zamanlayıcısı kurun." FontSize="12" Foreground="{StaticResource TextMuted}" Margin="0,4,0,20"/>
+                        <TextBlock x:Name="TxtStartTitle" Text="Doğrulamalı Güç Planı Yönetimi, Uyku Kilidi &amp; Zamanlayıcı" FontSize="20" FontWeight="Bold"/>
+                        <TextBlock x:Name="TxtStartSubtitle" Text="Mevcut güç şemalarını sorgular, mükerrer plan üretmeden Nihai Performans planını etkinleştirip doğrular ve çıkışta uyku kilidini temizler." FontSize="12" Foreground="{DynamicResource TextMuted}" Margin="0,4,0,18"/>
 
-                        <Border Background="{StaticResource CardDark}" BorderBrush="{StaticResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="20">
+                        <Border Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="10" Padding="20" Margin="0,0,0,16">
                             <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,0,0,14">
-                                    <Button x:Name="BtnOpenStartup" Click="BtnOpenStartup_Click" Background="{StaticResource CardDarkHover}" Margin="0,0,10,0">
+                                <TextBlock x:Name="TxtPowerSectionHeader" Text="Donanım Güç Planı ve Ekran Uyku Kilidi (Caffeine)" FontWeight="SemiBold" FontSize="14" Margin="0,0,0,12"/>
+                                <WrapPanel Margin="0,0,0,16">
+                                    <Button x:Name="BtnOpenStartup" Click="BtnOpenStartup_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,10,8">
                                         <TextBlock x:Name="TxtBtnOpenStartup" Text="Uyku Kilidini (Uyanık Tut) Başlat" FontWeight="SemiBold"/>
                                     </Button>
-                                    <Button x:Name="BtnUnlockPower" Click="BtnUnlockPower_Click" Background="{StaticResource AccentAmber}" BorderThickness="0">
-                                        <TextBlock Text="Nihai Performans Güç Planını Aç" FontWeight="Bold" Foreground="#090B10"/>
+                                    <Button x:Name="BtnUnlockPower" Click="BtnUnlockPower_Click" Background="{DynamicResource AccentAmber}" BorderThickness="0" Margin="0,0,10,8">
+                                        <TextBlock x:Name="TxtBtnUnlockPower" Text="Nihai Performans Planını Doğrula ve Etkinleştir" FontWeight="Bold" Foreground="#090B10"/>
                                     </Button>
-                                </StackPanel>
+                                    <Button x:Name="BtnRestoreBalancedPower" Click="BtnRestoreBalancedPower_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,0,8">
+                                        <TextBlock x:Name="TxtBtnRestoreBalancedPower" Text="Standart Dengeli (Balanced) Güç Planına Dön" FontWeight="SemiBold"/>
+                                    </Button>
+                                </WrapPanel>
 
-                                <StackPanel Orientation="Horizontal">
-                                    <Button x:Name="BtnShutdownTimer" Click="BtnShutdownTimer_Click" Background="{StaticResource AccentCyan}" BorderThickness="0" Margin="0,0,10,0">
-                                        <TextBlock Text="60 Dk Sonra Otomatik Kapat" FontWeight="Bold" Foreground="#090B10"/>
+                                <TextBlock x:Name="TxtTimerSectionHeader" Text="Otomatik Sistem Kapatma Zamanlayıcısı" FontWeight="SemiBold" FontSize="14" Margin="0,4,0,12"/>
+                                <WrapPanel>
+                                    <Button x:Name="BtnShutdown30" Click="BtnShutdown30_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,10,8">
+                                        <TextBlock x:Name="TxtBtnShutdown30" Text="30 Dk Sonra Kapat" FontWeight="SemiBold"/>
                                     </Button>
-                                    <Button x:Name="BtnCancelShutdown" Click="BtnCancelShutdown_Click" Background="{StaticResource CardDarkHover}">
-                                        <TextBlock Text="Zamanlayıcıyı İptal Et" FontWeight="SemiBold"/>
+                                    <Button x:Name="BtnShutdownTimer" Click="BtnShutdownTimer_Click" Background="{DynamicResource AccentCyan}" BorderThickness="0" Margin="0,0,10,8">
+                                        <TextBlock x:Name="TxtBtnShutdown60" Text="60 Dk Sonra Otomatik Kapat" FontWeight="Bold" Foreground="#090B10"/>
                                     </Button>
-                                </StackPanel>
+                                    <Button x:Name="BtnShutdown120" Click="BtnShutdown120_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,10,8">
+                                        <TextBlock x:Name="TxtBtnShutdown120" Text="120 Dk Sonra Kapat" FontWeight="SemiBold"/>
+                                    </Button>
+                                    <Button x:Name="BtnCancelShutdown" Click="BtnCancelShutdown_Click" Background="#E11D48" BorderThickness="0" Margin="0,0,0,8">
+                                        <TextBlock x:Name="TxtBtnCancelShutdown" Text="Zamanlayıcıyı İptal Et" FontWeight="Bold" Foreground="#FFFFFF"/>
+                                    </Button>
+                                </WrapPanel>
+
+                                <TextBlock x:Name="TxtPowerStatus" Text="" Margin="0,12,0,0" FontSize="12" Foreground="{DynamicResource AccentEmerald}" TextWrapping="Wrap"/>
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -253,10 +426,11 @@
             </Grid>
         </Grid>
 
-        <Border Grid.Row="2" Background="#0B0D14" BorderBrush="{StaticResource BorderDark}" BorderThickness="0,1,0,0" Padding="20,0">
+        <!-- FOOTER BAR -->
+        <Border Grid.Row="2" Background="{DynamicResource BgFooter}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,1,0,0" Padding="20,0">
             <Grid VerticalAlignment="Center">
-                <TextBlock Text="QOVX v2.0.4 • Yayıncı: ALLAHVERDİ CAN • %100 Yerel Mimari" FontSize="11" Foreground="{StaticResource TextMuted}"/>
-                <TextBlock HorizontalAlignment="Right" Text="Windows 10 / 11 x64 Native" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                <TextBlock x:Name="TxtFooterLeft" Text="QOVX v3.0.0 • Yayıncı: ALLAHVERDİ CAN • %100 Yerel Mimari" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                <TextBlock x:Name="TxtFooterRight" HorizontalAlignment="Right" Text="Windows 10 / 11 x64 Native (.NET 10 LTS)" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
             </Grid>
         </Border>
     </Grid>

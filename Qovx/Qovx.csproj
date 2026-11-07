@@ -2,30 +2,27 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <TargetFramework>net10.0-windows10.0.19041.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <Platforms>x64</Platforms>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <ApplicationIcon>Assets\AppIcon.ico</ApplicationIcon>
     <AssemblyName>Qovx</AssemblyName>
     <RootNamespace>Qovx</RootNamespace>
-    <Version>2.0.4</Version>
-    <FileVersion>2.0.4.0</FileVersion>
-    <AssemblyVersion>2.0.4.0</AssemblyVersion>
-    <Authors>ALLAHVERDİ CAN</Authors>
+    <Version>3.0.1.0</Version>
+    <AssemblyVersion>3.0.1.0</AssemblyVersion>
+    <FileVersion>3.0.1.0</FileVersion>
     <Company>ALLAHVERDİ CAN</Company>
-    <Product>QOVX System &amp; Network Control Suite</Product>
-    <Description>Native Windows system, memory working-set, storage cache, and network latency control suite.</Description>
-    <Copyright>Copyright © 2026 ALLAHVERDİ CAN. All rights reserved.</Copyright>
-    <SelfContained>false</SelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-    <PlatformTarget>x64</PlatformTarget>
+    <Authors>ALLAHVERDİ CAN</Authors>
+    <Product>QOVX - Windows System &amp; Network Control Suite</Product>
+    <Description>Native Windows physical memory working-set trimmer, safe storage cache &amp; SHA-256 duplicate manager, UDP/TCP DNS resolver benchmark, reversible privacy rules, and power control suite.</Description>
+    <Copyright>Copyright © 2026 ALLAHVERDİ CAN. All Rights Reserved.</Copyright>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Update="Package.appxmanifest">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <Content Include="Assets\**">
+    <Content Include="Assets\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

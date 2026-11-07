@@ -8,14 +8,14 @@
   <Identity
     Name="ALLAHVERDCAN.QOVX"
     Publisher="CN=80F86ABB-4ABB-4524-A032-0CE77FF05712"
-    Version="2.0.4.0"
+    Version="3.0.1.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
     <DisplayName>QOVX</DisplayName>
     <PublisherDisplayName>ALLAHVERDİ CAN</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
-    <Description>Native Windows system, physical memory working-set, storage cache, and network latency control suite.</Description>
+    <Description>Native Windows system, physical memory working-set manager, storage cache &amp; SHA-256 duplicate finder, UDP/TCP DNS query benchmark, reversible privacy settings, and power control suite.</Description>
   </Properties>
 
   <Dependencies>
