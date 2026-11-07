@@ -30,7 +30,7 @@
                     </Border>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="QOVX" FontWeight="ExtraBold" FontSize="17" Foreground="{DynamicResource TextWhite}"/>
-                        <TextBlock x:Name="TxtHeaderSubtitle" Text="System &amp; Network Control Suite v3.0.0" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                        <TextBlock x:Name="TxtHeaderSubtitle" Text="System &amp; Network Control Suite v3.0.2" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -154,8 +154,16 @@
                             <Button x:Name="BtnMasterBoost" Click="BtnMasterBoost_Click" Background="{DynamicResource AccentCyan}" BorderThickness="0" Padding="36,16">
                                 <TextBlock x:Name="TxtBtnMaster" Text="HIZLI BAKIM VE ÖNBELLEK TEMİZLİĞİNİ BAŞLAT" FontSize="15" FontWeight="Bold" Foreground="#090B10"/>
                             </Button>
-                            <TextBlock x:Name="TxtBoostStatus" Text="Kritik sistem süreçlerini koruyarak kullanıcı süreçlerinin çalışma kümelerini daraltır, kilitsiz %TEMP% dosyalarını siler ve DNS önbelleğini sıfırlar." HorizontalAlignment="Center" Margin="0,14,0,0" FontSize="12" Foreground="{DynamicResource TextMuted}" TextWrapping="Wrap" TextAlignment="Center"/>
-                            <ProgressBar x:Name="PbBoost" Height="6" Width="400" Visibility="Collapsed" Margin="0,12,0,0" Foreground="{DynamicResource AccentCyan}" Background="{DynamicResource BorderDark}"/>
+                            <TextBlock x:Name="TxtBoostStatus" Text="Kritik sistem süreçlerini koruyarak kullanıcı süreçlerinin çalışma kümelerini daraltır, kilitsiz %TEMP% dosyalarını siler ve DNS önbelleğini sıfırlar." HorizontalAlignment="Center" Margin="0,14,0,0" FontSize="12.5" Foreground="{DynamicResource TextMuted}" TextWrapping="Wrap" TextAlignment="Center"/>
+                            <Border x:Name="BdrBoostProgressPanel" Visibility="Collapsed" Background="#0D111A" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="16,12" Width="540" Margin="0,14,0,0">
+                                <StackPanel>
+                                    <DockPanel Margin="0,0,0,6">
+                                        <TextBlock x:Name="TxtBoostStageLabel" Text="Sistem bakım adımları yürütülüyor..." FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextWhite}"/>
+                                        <TextBlock x:Name="TxtBoostPercent" Text="0%" FontSize="12.5" FontWeight="Bold" Foreground="{DynamicResource AccentCyan}" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+                                    </DockPanel>
+                                    <ProgressBar x:Name="PbBoost" Height="10" Minimum="0" Maximum="100" Value="0" Visibility="Visible" Foreground="{DynamicResource AccentCyan}" Background="{DynamicResource BorderDark}" BorderThickness="0"/>
+                                </StackPanel>
+                            </Border>
                             <TextBlock x:Name="TxtHardwareSummary" Text="" HorizontalAlignment="Center" Margin="0,14,0,0" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                         </StackPanel>
                     </Border>
@@ -191,6 +199,7 @@
                                     <TextBlock x:Name="TxtBtnTrimSelectedProc" Text="Seçili Sürecin Çalışma Kümesini Daralt" FontWeight="Bold" Foreground="#090B10"/>
                                 </Button>
                             </WrapPanel>
+                            <ProgressBar x:Name="PbRamOp" Height="7" Minimum="0" Maximum="100" Value="0" Visibility="Collapsed" Margin="0,8,0,0" Foreground="{DynamicResource AccentCyan}" Background="{DynamicResource BorderDark}" BorderThickness="0"/>
                         </StackPanel>
                     </Border>
 
@@ -274,6 +283,7 @@
                                     <TextBlock x:Name="TxtBtnDeleteSelectedDup" Text="Seçili Kopyayı Doğrula &amp; Geri Dönüşüme Gönder" FontWeight="Bold" Foreground="#FFFFFF"/>
                                 </Button>
                             </WrapPanel>
+                            <ProgressBar x:Name="PbDiskOp" Height="8" Minimum="0" Maximum="100" Value="0" Visibility="Collapsed" Margin="0,8,0,4" Foreground="{DynamicResource AccentAmber}" Background="{DynamicResource BorderDark}" BorderThickness="0"/>
                             <TextBlock x:Name="TxtDiskResult" Text="" Margin="0,6,0,0" FontSize="12" Foreground="{DynamicResource AccentEmerald}" TextWrapping="Wrap"/>
                         </StackPanel>
                     </Border>
@@ -429,7 +439,7 @@
         <!-- FOOTER BAR -->
         <Border Grid.Row="2" Background="{DynamicResource BgFooter}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,1,0,0" Padding="20,0">
             <Grid VerticalAlignment="Center">
-                <TextBlock x:Name="TxtFooterLeft" Text="QOVX v3.0.0 • Yayıncı: ALLAHVERDİ CAN • %100 Yerel Mimari" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                <TextBlock x:Name="TxtFooterLeft" Text="QOVX v3.0.2 • Yayıncı: ALLAHVERDİ CAN • %100 Yerel Mimari" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                 <TextBlock x:Name="TxtFooterRight" HorizontalAlignment="Right" Text="Windows 10 / 11 x64 Native (.NET 10 LTS)" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
             </Grid>
         </Border>

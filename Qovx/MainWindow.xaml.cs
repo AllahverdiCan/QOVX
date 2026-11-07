@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Threading;
 using Microsoft.Win32;
 
@@ -134,6 +135,135 @@ namespace Qovx
     {
         public int SchemaVersion { get; set; } = 1;
         public Dictionary<string, RegistryValueSnapshot> Snapshots { get; set; } = new Dictionary<string, RegistryValueSnapshot>(StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Synthesizes 100% royalty-free, soft marimba and pop UI audio cues in memory (44.1 kHz 16-bit PCM)
+    /// with cosine attack and exponential decay envelopes so there is zero ear fatigue or external asset dependency.
+    /// </summary>
+    public static class SoundManager
+    {
+        private const int SampleRate = 44100;
+
+        private static byte[] BuildMarimbaWav( (double FreqHz, double StartSec, double DurationSec, double Gain)[] notes, double totalDurationSec)
+        {
+            int totalSamples = Math.Max(64, (int)(SampleRate * totalDurationSec));
+            int dataBytes = totalSamples * 2;
+
+            using var ms = new MemoryStream(44 + dataBytes);
+            using var bw = new BinaryWriter(ms);
+
+            bw.Write(Encoding.ASCII.GetBytes("RIFF"));
+            bw.Write(36 + dataBytes);
+            bw.Write(Encoding.ASCII.GetBytes("WAVE"));
+            bw.Write(Encoding.ASCII.GetBytes("fmt "));
+            bw.Write(16);
+            bw.Write((ushort)1); // PCM
+            bw.Write((ushort)1); // Mono
+            bw.Write(SampleRate);
+            bw.Write(SampleRate * 2);
+            bw.Write((ushort)2);
+            bw.Write((ushort)16);
+            bw.Write(Encoding.ASCII.GetBytes("data"));
+            bw.Write(dataBytes);
+
+            double[] mixBuffer = new double[totalSamples];
+
+            foreach (var note in notes)
+            {
+                int startIdx = Math.Clamp((int)(note.StartSec * SampleRate), 0, totalSamples - 1);
+                int lenSamples = Math.Clamp((int)(note.DurationSec * SampleRate), 1, totalSamples - startIdx);
+                int attackSamples = Math.Max(16, (int)(0.004 * SampleRate)); // 4ms soft cosine attack
+
+                for (int i = 0; i < lenSamples; i++)
+                {
+                    double t = (double)i / SampleRate;
+                    double envAttack = i < attackSamples
+                        ? 0.5 * (1.0 - Math.Cos(Math.PI * i / attackSamples))
+                        : 1.0;
+                    // Smooth marimba exponential decay
+                    double envDecay = Math.Exp(-t * (4.8 / Math.Max(0.04, note.DurationSec)));
+
+                    // Fundamental sine + soft 4th harmonic (classic warm wooden marimba overtone)
+                    double fundamental = Math.Sin(2.0 * Math.PI * note.FreqHz * t);
+                    double overtone = 0.18 * Math.Sin(2.0 * Math.PI * (note.FreqHz * 2.0) * t) * Math.Exp(-t * 18.0);
+                    double sample = (fundamental + overtone) * envAttack * envDecay * note.Gain;
+
+                    mixBuffer[startIdx + i] += sample;
+                }
+            }
+
+            for (int i = 0; i < totalSamples; i++)
+            {
+                double clamped = Math.Clamp(mixBuffer[i], -0.95, 0.95);
+                short pcm = (short)(clamped * short.MaxValue);
+                bw.Write(pcm);
+            }
+
+            bw.Flush();
+            return ms.ToArray();
+        }
+
+        private static void PlayWavAsync(byte[] wavBytes)
+        {
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                try
+                {
+                    using var ms = new MemoryStream(wavBytes);
+                    using var player = new System.Media.SoundPlayer(ms);
+                    player.PlaySync();
+                }
+                catch
+                {
+                }
+            });
+        }
+
+        public static void PlayClick()
+        {
+            // Soft marimba pop (D5 -> A5 micro-tap)
+            byte[] wav = BuildMarimbaWav(new[]
+            {
+                (587.33, 0.000, 0.045, 0.16),
+                (880.00, 0.012, 0.040, 0.11)
+            }, 0.060);
+            PlayWavAsync(wav);
+        }
+
+        public static void PlayStageTick()
+        {
+            // Subtle progress step tick (E5)
+            byte[] wav = BuildMarimbaWav(new[]
+            {
+                (659.25, 0.000, 0.038, 0.12)
+            }, 0.045);
+            PlayWavAsync(wav);
+        }
+
+        public static void PlaySuccessChord()
+        {
+            // Warm macOS-style ascending C5 - E5 - G5 - C6 marimba chord
+            byte[] wav = BuildMarimbaWav(new[]
+            {
+                (523.25, 0.000, 0.180, 0.18),
+                (659.25, 0.055, 0.180, 0.18),
+                (783.99, 0.110, 0.220, 0.20),
+                (1046.50, 0.165, 0.260, 0.16)
+            }, 0.440);
+            PlayWavAsync(wav);
+        }
+
+        public static void PlayWarning()
+        {
+            // Gentle low marimba double-tap (G4 -> E4)
+            byte[] wav = BuildMarimbaWav(new[]
+            {
+                (392.00, 0.000, 0.110, 0.18),
+                (329.63, 0.095, 0.150, 0.18)
+            }, 0.260);
+            PlayWavAsync(wav);
+        }
     }
 
     public partial class MainWindow : Window
@@ -295,14 +425,56 @@ namespace Qovx
             try
             {
                 if (isSuccess)
-                    System.Media.SystemSounds.Asterisk.Play();
+                    SoundManager.PlaySuccessChord();
                 else
-                    System.Media.SystemSounds.Beep.Play();
+                    SoundManager.PlayClick();
             }
             catch (Exception ex)
             {
                 App.LogDiagnosticEvent("AUDIO", ex.Message);
             }
+        }
+
+        private void PlayStageTickSound()
+        {
+            if (!_isSoundEnabled || _isWindowClosing) return;
+            try { SoundManager.PlayStageTick(); } catch { }
+        }
+
+        private async Task AnimateProgressBarToAsync(ProgressBar bar, double targetValue, int durationMs, TextBlock? percentLabel = null)
+        {
+            if (_isWindowClosing || bar == null) return;
+            var tcs = new TaskCompletionSource<bool>();
+            var anim = new DoubleAnimation
+            {
+                To = Math.Clamp(targetValue, 0, 100),
+                Duration = TimeSpan.FromMilliseconds(Math.Max(40, durationMs)),
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+            if (percentLabel != null)
+            {
+                percentLabel.Text = $"{(int)Math.Round(targetValue)}%";
+            }
+            anim.Completed += (s, e) => tcs.TrySetResult(true);
+            bar.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, anim);
+            await Task.WhenAny(tcs.Task, Task.Delay(durationMs + 60));
+        }
+
+        private void ApplyTabTransitionAnimation(UIElement targetTab)
+        {
+            if (targetTab == null || _isWindowClosing) return;
+            var trans = new TranslateTransform(0, 8);
+            targetTab.RenderTransform = trans;
+            var fade = new DoubleAnimation(0.35, 1.0, TimeSpan.FromMilliseconds(185))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+            var slide = new DoubleAnimation(8.0, 0.0, TimeSpan.FromMilliseconds(185))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+            targetTab.BeginAnimation(UIElement.OpacityProperty, fade);
+            trans.BeginAnimation(TranslateTransform.YProperty, slide);
         }
 
         private (uint LoadPercent, double TotalGb, double AvailGb, double UsedGb) ReadPhysicalMemorySnapshot()
@@ -866,6 +1038,18 @@ namespace Qovx
             TabPriv.Visibility = tag == "Priv" ? Visibility.Visible : Visibility.Collapsed;
             TabStart.Visibility = tag == "Start" ? Visibility.Visible : Visibility.Collapsed;
 
+            UIElement? activeTab = tag switch
+            {
+                "Dash" => TabDash,
+                "Ram" => TabRam,
+                "Disk" => TabDisk,
+                "Net" => TabNet,
+                "Priv" => TabPriv,
+                "Start" => TabStart,
+                _ => null
+            };
+            if (activeTab != null) ApplyTabTransitionAnimation(activeTab);
+
             ResetNavButtons();
             btn.Background = (Brush)FindResource("CardDarkHover");
             btn.BorderBrush = (Brush)FindResource("AccentCyan");
@@ -911,26 +1095,79 @@ namespace Qovx
                 return;
             }
 
-            BtnMasterBoost.IsEnabled = false;
-            PbBoost.Visibility = Visibility.Visible;
-            PbBoost.IsIndeterminate = true;
-            PlayUiFeedbackSound(false);
+            if (Interlocked.CompareExchange(ref _netBusyFlag, 1, 0) != 0)
+            {
+                Interlocked.Exchange(ref _diskBusyFlag, 0);
+                Interlocked.Exchange(ref _ramBusyFlag, 0);
+                TxtBoostStatus.Text = _isEnglish
+                    ? "A network benchmark or reset operation is currently running."
+                    : "Şu anda bir ağ testi veya sıfırlama işlemi çalışıyor.";
+                return;
+            }
 
-            TxtBoostStatus.Text = _isEnglish
-                ? "Trimming eligible user process working sets, cleaning unlocked %TEMP% files, and flushing DNS..."
-                : "Kullanıcı süreçlerinin çalışma kümeleri daraltılıyor, kilitsiz %TEMP% dosyaları siliniyor ve DNS sıfırlanıyor...";
+            BtnMasterBoost.IsEnabled = false;
+            BdrBoostProgressPanel.Visibility = Visibility.Visible;
+            PbBoost.IsIndeterminate = false;
+            PbBoost.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, null);
+            PbBoost.Value = 0;
+            TxtBoostPercent.Text = "0%";
+            PlayUiFeedbackSound(false);
 
             var cleanReport = new CleanupOperationReport();
             bool dnsFlushed = false;
+            CancellationToken lifetimeToken = _appLifetimeCts?.Token ?? CancellationToken.None;
 
             try
             {
-                await Task.Run(async () =>
+                // Stage 1/4: Working Set Memory Trim
+                TxtBoostStageLabel.Text = _isEnglish
+                    ? "[Stage 1/4] Analyzing active processes & trimming inactive working sets..."
+                    : "[Aşama 1/4] Aktif süreçler analiz ediliyor ve çalışma kümeleri daraltılıyor...";
+                TxtBoostStatus.Text = TxtBoostStageLabel.Text;
+                await AnimateProgressBarToAsync(PbBoost, 28, 260, TxtBoostPercent);
+                if (_isWindowClosing || lifetimeToken.IsCancellationRequested) return;
+
+                _lastRamReport = await Task.Run(() => ExecuteWorkingSetTrimCore(), lifetimeToken);
+                PlayStageTickSound();
+
+                // Stage 2/4: Temporary & Shader Cache Cleanup
+                TxtBoostStageLabel.Text = _isEnglish
+                    ? "[Stage 2/4] Scanning and cleaning unlocked %TEMP% and DirectX Shader caches..."
+                    : "[Aşama 2/4] Kilitsiz %TEMP% ve DirectX Shader önbellek dosyaları temizleniyor...";
+                TxtBoostStatus.Text = TxtBoostStageLabel.Text;
+                await AnimateProgressBarToAsync(PbBoost, 64, 310, TxtBoostPercent);
+                if (_isWindowClosing || lifetimeToken.IsCancellationRequested) return;
+
+                cleanReport = await Task.Run(() =>
                 {
-                    _lastRamReport = ExecuteWorkingSetTrimCore();
-                    cleanReport = CleanDirectoryDetailedSafe(Path.GetTempPath(), CancellationToken.None);
-                    dnsFlushed = await FlushDnsResolverVerifiedAsync();
-                });
+                    var rep1 = CleanDirectoryDetailedSafe(Path.GetTempPath(), lifetimeToken);
+                    string d3d = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "D3DSCache");
+                    var rep2 = CleanDirectoryDetailedSafe(d3d, lifetimeToken);
+                    rep1.DeletedFiles += rep2.DeletedFiles;
+                    rep1.LockedSkippedFiles += rep2.LockedSkippedFiles;
+                    rep1.RemovedEmptyDirs += rep2.RemovedEmptyDirs;
+                    rep1.FreedBytes += rep2.FreedBytes;
+                    return rep1;
+                }, lifetimeToken);
+                PlayStageTickSound();
+
+                // Stage 3/4: DNS Resolver Cache Flush
+                TxtBoostStageLabel.Text = _isEnglish
+                    ? "[Stage 3/4] Flushing and verifying Windows DNS resolver cache..."
+                    : "[Aşama 3/4] Windows DNS çözümleyici önbelleği sıfırlanıyor ve doğrulanıyor...";
+                TxtBoostStatus.Text = TxtBoostStageLabel.Text;
+                await AnimateProgressBarToAsync(PbBoost, 88, 220, TxtBoostPercent);
+                if (_isWindowClosing || lifetimeToken.IsCancellationRequested) return;
+
+                dnsFlushed = await FlushDnsResolverVerifiedAsync();
+                PlayStageTickSound();
+
+                // Stage 4/4: Hardware Metrics Verification & Completion
+                TxtBoostStageLabel.Text = _isEnglish
+                    ? "[Stage 4/4] Refreshing hardware telemetry — Maintenance complete!"
+                    : "[Aşama 4/4] Donanım metrikleri güncelleniyor — Hızlı bakım tamamlandı!";
+                await AnimateProgressBarToAsync(PbBoost, 100, 220, TxtBoostPercent);
+                if (_isWindowClosing || lifetimeToken.IsCancellationRequested) return;
 
                 _lastActuallyFreedBytes += cleanReport.FreedBytes;
                 _lastActuallyFreedFiles += cleanReport.DeletedFiles;
@@ -943,8 +1180,8 @@ namespace Qovx
                 double freedMb = cleanReport.FreedBytes / (1024.0 * 1024.0);
                 double ramDeltaMb = _lastRamReport.PhysicalDeltaMb;
                 TxtBoostStatus.Text = _isEnglish
-                    ? $"Maintenance Summary: {_lastRamReport.SuccessfulApiCalls} user apps trimmed (Physical RAM Change: {ramDeltaMb:F1} MB), {cleanReport.DeletedFiles} temp files deleted ({freedMb:F2} MB freed, {cleanReport.LockedSkippedFiles} locked skipped), DNS Flush: {(dnsFlushed ? "Verified OK" : "Failed")}."
-                    : $"Bakım Özeti: {_lastRamReport.SuccessfulApiCalls} kullanıcı süreci daraltıldı (Fiziksel RAM Değişimi: {ramDeltaMb:F1} MB), {cleanReport.DeletedFiles} geçici dosya silindi ({freedMb:F2} MB kazanıldı, {cleanReport.LockedSkippedFiles} kilitli dosya atlandı), DNS Sıfırlama: {(dnsFlushed ? "Doğrulandı" : "Başarısız")}.";
+                    ? $"✓ Maintenance Complete: {_lastRamReport.SuccessfulApiCalls} user apps trimmed (RAM Delta: {ramDeltaMb:F1} MB) • {cleanReport.DeletedFiles} cache files removed ({freedMb:F2} MB freed, {cleanReport.LockedSkippedFiles} active/locked skipped) • DNS Cache: {(dnsFlushed ? "Flushed & Verified" : "Failed")}."
+                    : $"✓ Bakım Tamamlandı: {_lastRamReport.SuccessfulApiCalls} kullanıcı süreci daraltıldı (RAM Değişimi: {ramDeltaMb:F1} MB) • {cleanReport.DeletedFiles} önbellek dosyası silindi ({freedMb:F2} MB açıldı, {cleanReport.LockedSkippedFiles} kullanımda olan dosya korundu) • DNS Önbelleği: {(dnsFlushed ? "Sıfırlandı ve Doğrulandı" : "Başarısız")}.";
                 PlayUiFeedbackSound(true);
             }
             catch (Exception ex)
@@ -956,8 +1193,11 @@ namespace Qovx
             }
             finally
             {
-                PbBoost.Visibility = Visibility.Collapsed;
-                BtnMasterBoost.IsEnabled = true;
+                if (!_isWindowClosing)
+                {
+                    BtnMasterBoost.IsEnabled = true;
+                }
+                Interlocked.Exchange(ref _netBusyFlag, 0);
                 Interlocked.Exchange(ref _diskBusyFlag, 0);
                 Interlocked.Exchange(ref _ramBusyFlag, 0);
             }
@@ -974,9 +1214,15 @@ namespace Qovx
             }
 
             BtnPurgeRam.IsEnabled = false;
+            PbRamOp.Visibility = Visibility.Visible;
+            PbRamOp.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, null);
+            PbRamOp.Value = 0;
+            PlayUiFeedbackSound(false);
             try
             {
+                await AnimateProgressBarToAsync(PbRamOp, 45, 180);
                 _lastRamReport = await Task.Run(() => ExecuteWorkingSetTrimCore());
+                await AnimateProgressBarToAsync(PbRamOp, 100, 180);
                 UpdateRealHardwareMetrics();
                 RenderRamLastReportText();
                 RefreshTopProcessesList();
@@ -984,7 +1230,10 @@ namespace Qovx
             }
             finally
             {
-                BtnPurgeRam.IsEnabled = true;
+                if (!_isWindowClosing)
+                {
+                    BtnPurgeRam.IsEnabled = true;
+                }
                 Interlocked.Exchange(ref _ramBusyFlag, 0);
             }
         }
@@ -1043,6 +1292,10 @@ namespace Qovx
             BtnSelectDupFolder.IsEnabled = false;
             BtnCleanDisk.IsEnabled = false;
             BtnCancelDiskOp.IsEnabled = true;
+            PbDiskOp.Visibility = Visibility.Visible;
+            PbDiskOp.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, null);
+            PbDiskOp.Value = 15;
+            _ = AnimateProgressBarToAsync(PbDiskOp, 75, 350);
 
             TxtDiskResult.Text = _isEnglish
                 ? "Scanning selected cache targets and computing stream-based SHA-256 digests..."
@@ -1086,6 +1339,7 @@ namespace Qovx
             }
             finally
             {
+                _ = AnimateProgressBarToAsync(PbDiskOp, 100, 180);
                 BtnScanDisk.IsEnabled = true;
                 BtnSelectDupFolder.IsEnabled = true;
                 BtnCleanDisk.IsEnabled = true;
@@ -1187,6 +1441,10 @@ namespace Qovx
             BtnSelectDupFolder.IsEnabled = false;
             BtnCleanDisk.IsEnabled = false;
             BtnCancelDiskOp.IsEnabled = true;
+            PbDiskOp.Visibility = Visibility.Visible;
+            PbDiskOp.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, null);
+            PbDiskOp.Value = 15;
+            _ = AnimateProgressBarToAsync(PbDiskOp, 75, 350);
 
             var totalReport = new CleanupOperationReport();
 
@@ -1246,6 +1504,7 @@ namespace Qovx
             }
             finally
             {
+                _ = AnimateProgressBarToAsync(PbDiskOp, 100, 180);
                 BtnScanDisk.IsEnabled = true;
                 BtnSelectDupFolder.IsEnabled = true;
                 BtnCleanDisk.IsEnabled = true;
@@ -1529,8 +1788,10 @@ namespace Qovx
                             if ((fi.Attributes & FileAttributes.ReparsePoint) != 0)
                                 continue;
 
-                            // Evaluate files >= 0 bytes (0-byte files grouped together as well)
+                            // Evaluate files >= 1024 bytes (1 KB) so 0-byte empty app placeholders do not clutter duplicate results
                             long len = fi.Length;
+                            if (len < 1024)
+                                continue;
                             if (!filesBySize.TryGetValue(len, out var list))
                             {
                                 list = new List<string>();
@@ -1894,6 +2155,7 @@ namespace Qovx
                 ("OpenDNS Cisco", "208.67.222.222")
             };
 
+            CancellationToken lifetimeToken = _appLifetimeCts?.Token ?? CancellationToken.None;
             try
             {
                 var results = await Task.Run(() =>
@@ -1903,6 +2165,7 @@ namespace Qovx
 
                     foreach (var t in targets)
                     {
+                        if (_isWindowClosing || lifetimeToken.IsCancellationRequested) break;
                         var res = new DnsProviderBenchmarkResult
                         {
                             ProviderName = t.Name,
@@ -1912,6 +2175,7 @@ namespace Qovx
                         // 3 DNS query samples per provider
                         for (int s = 0; s < 3; s++)
                         {
+                            if (_isWindowClosing || lifetimeToken.IsCancellationRequested) break;
                             var sample = ExecuteSingleDnsQuerySample(t.Ip, 1400);
                             res.LastStatus = sample.Status;
                             res.LastStatusDetail = sample.Detail;
@@ -1947,6 +2211,7 @@ namespace Qovx
                     return list;
                 });
 
+                if (_isWindowClosing || lifetimeToken.IsCancellationRequested) return;
                 _lastDnsResults.Clear();
                 _lastDnsResults.AddRange(results);
                 RenderDnsBenchmarkResults();
@@ -1956,12 +2221,16 @@ namespace Qovx
             catch (Exception ex)
             {
                 App.LogDiagnosticEvent("DNS_BENCH", ex.Message);
-                ValDnsPing.Text = _isEnglish ? "Error" : "Hata";
-                ValDnsProvider.Text = ex.Message;
+                if (!_isWindowClosing)
+                {
+                    ValDnsPing.Text = _isEnglish ? "Error" : "Hata";
+                    ValDnsProvider.Text = ex.Message;
+                }
             }
             finally
             {
-                BtnTestPing.IsEnabled = true;
+                if (!_isWindowClosing)
+                    BtnTestPing.IsEnabled = true;
                 Interlocked.Exchange(ref _netBusyFlag, 0);
             }
         }
@@ -2827,7 +3096,7 @@ namespace Qovx
 
             if (_isEnglish)
             {
-                TxtHeaderSubtitle.Text = "System & Network Control Suite v3.0.0";
+                TxtHeaderSubtitle.Text = "System & Network Control Suite v3.0.2";
                 TxtZeroTelemetry.Text = "● Zero Data Collection • User-Initiated DNS/Web Only";
                 NavTxtDash.Text = "System Overview & Boost";
                 NavTxtRam.Text = "Memory (RAM) Manager";
@@ -2907,12 +3176,12 @@ namespace Qovx
                 TxtBtnShutdown120.Text = "Shutdown in 120 Min";
                 TxtBtnCancelShutdown.Text = "Cancel Shutdown Timer";
 
-                TxtFooterLeft.Text = "QOVX v3.0.0 • Publisher: ALLAHVERDİ CAN • 100% Local Architecture";
+                TxtFooterLeft.Text = "QOVX v3.0.2 • Publisher: ALLAHVERDİ CAN • 100% Local Architecture";
                 TxtFooterRight.Text = "Windows 10 / 11 x64 Native (.NET 10 LTS)";
             }
             else
             {
-                TxtHeaderSubtitle.Text = "System & Network Control Suite v3.0.0";
+                TxtHeaderSubtitle.Text = "System & Network Control Suite v3.0.2";
                 TxtZeroTelemetry.Text = "● Sıfır Veri Toplama • Yalnızca Kullanıcı İsteğiyle DNS/Web";
                 NavTxtDash.Text = "Sistem Özeti & Hızlandır";
                 NavTxtRam.Text = "Bellek (RAM) Yönetimi";
@@ -2992,7 +3261,7 @@ namespace Qovx
                 TxtBtnShutdown120.Text = "120 Dk Sonra Kapat";
                 TxtBtnCancelShutdown.Text = "Zamanlayıcıyı İptal Et";
 
-                TxtFooterLeft.Text = "QOVX v3.0.0 • Yayıncı: ALLAHVERDİ CAN • %100 Yerel Mimari";
+                TxtFooterLeft.Text = "QOVX v3.0.2 • Yayıncı: ALLAHVERDİ CAN • %100 Yerel Mimari";
                 TxtFooterRight.Text = "Windows 10 / 11 x64 Native (.NET 10 LTS)";
             }
         }

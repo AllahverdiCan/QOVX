@@ -7,7 +7,7 @@
   "targets": {
     ".NETCoreApp,Version=v10.0": {},
     ".NETCoreApp,Version=v10.0/win-x64": {
-      "Qovx/3.0.1.0": {
+      "Qovx/3.0.2.0": {
         "dependencies": {
           "runtimepack.Microsoft.Windows.SDK.NET.Ref": "10.0.19041.57"
         },
@@ -30,7 +30,7 @@
     }
   },
   "libraries": {
-    "Qovx/3.0.1.0": {
+    "Qovx/3.0.2.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

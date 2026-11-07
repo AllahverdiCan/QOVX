@@ -57,7 +57,7 @@ namespace Qovx {
             
             #line default
             #line hidden
-            System.Uri resourceLocater = new System.Uri("/Qovx;V3.0.1.0;component/app.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/Qovx;V3.0.2.0;component/app.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\App.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

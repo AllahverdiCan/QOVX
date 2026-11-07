@@ -8,10 +8,13 @@ using System.Windows.Threading;
 
 namespace Qovx
 {
-    public partial class App : Application
+    /// <summary>
+    /// Thread-safe local diagnostic logger with 512 KB log rotation and path sanitization.
+    /// </summary>
+    public static class Logger
     {
-        private static readonly object LogSyncRoot = new object();
-        private const long MaxLogFileBytes = 512 * 1024; // 512 KB log rotation threshold
+        private static readonly object SyncRoot = new object();
+        private const long MaxLogFileBytes = 512 * 1024;
 
         public static string GetAppDataDirectory()
         {
@@ -22,15 +25,13 @@ namespace Qovx
             return dir;
         }
 
-        private static string SanitizeLogField(string? input)
+        private static string Sanitize(string? input)
         {
             if (string.IsNullOrWhiteSpace(input))
                 return string.Empty;
 
-            // Prevent log injection by neutralizing CR/LF characters with proper C# escape sequences
             string clean = input.Replace("\r", " ").Replace("\n", " | ");
 
-            // Mask personal profile paths and username
             string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
             if (!string.IsNullOrEmpty(userProfile))
                 clean = clean.Replace(userProfile, "%USERPROFILE%", StringComparison.OrdinalIgnoreCase);
@@ -42,21 +43,22 @@ namespace Qovx
             return clean;
         }
 
-        public static void LogDiagnosticEvent(string category, string detail, Exception? ex = null)
+        public static void Log(string level, string category, string detail, Exception? ex = null)
         {
-            string safeCat = SanitizeLogField(category);
-            string safeDetail = SanitizeLogField(detail);
+            string safeLevel = Sanitize(level);
+            string safeCat = Sanitize(category);
+            string safeDetail = Sanitize(detail);
             string stackPart = ex?.StackTrace != null
-                ? " | Stack: " + SanitizeLogField(ex.StackTrace)
+                ? " | Stack: " + Sanitize(ex.StackTrace)
                 : string.Empty;
 
-            string line = $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff} UTC] [{safeCat}] {safeDetail}{stackPart}{Environment.NewLine}";
+            string line = $"[{DateTime.UtcNow:yyyy-MM-dd HH:mm:ss.fff} UTC] [{safeLevel}] [{safeCat}] {safeDetail}{stackPart}{Environment.NewLine}";
 
             ThreadPool.QueueUserWorkItem(_ =>
             {
                 try
                 {
-                    lock (LogSyncRoot)
+                    lock (SyncRoot)
                     {
                         string logFile = Path.Combine(GetAppDataDirectory(), "qovx_diagnostics.log");
                         if (File.Exists(logFile))
@@ -75,6 +77,20 @@ namespace Qovx
                 {
                 }
             });
+        }
+
+        public static void Info(string category, string detail) => Log("INFO", category, detail);
+        public static void Warn(string category, string detail) => Log("WARN", category, detail);
+        public static void Error(string category, string detail, Exception? ex = null) => Log("ERROR", category, detail, ex);
+    }
+
+    public partial class App : Application
+    {
+        public static string GetAppDataDirectory() => Logger.GetAppDataDirectory();
+
+        public static void LogDiagnosticEvent(string category, string detail, Exception? ex = null)
+        {
+            Logger.Log(ex != null ? "ERROR" : "INFO", category, detail, ex);
         }
 
         private static bool IsFatalCorruptedStateException(Exception? ex)
@@ -98,7 +114,7 @@ namespace Qovx
 
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
-            LogDiagnosticEvent("UI_DISPATCHER", e.Exception?.Message ?? "Unhandled UI exception", e.Exception);
+            Logger.Error("UI_DISPATCHER", e.Exception?.Message ?? "Unhandled UI exception", e.Exception);
 
             if (IsFatalCorruptedStateException(e.Exception))
             {
@@ -114,13 +130,13 @@ namespace Qovx
         {
             if (e.ExceptionObject is Exception ex)
             {
-                LogDiagnosticEvent("APP_DOMAIN", ex.Message, ex);
+                Logger.Error("APP_DOMAIN", ex.Message, ex);
             }
         }
 
         private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
         {
-            LogDiagnosticEvent("TASK_SCHEDULER", e.Exception?.Message ?? "Unobserved task exception", e.Exception);
+            Logger.Error("TASK_SCHEDULER", e.Exception?.Message ?? "Unobserved task exception", e.Exception);
             if (!IsFatalCorruptedStateException(e.Exception?.InnerException))
             {
                 e.SetObserved();
