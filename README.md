@@ -16,7 +16,24 @@
    - **Görsel Performans Ayarları & Güç Planları:** Hantal Windows saydamlık ve animasyon efektlerini yedekleyerek "En İyi Performans" moduna geçirir veya varsayılan kaliteye döndürür; Nihai Performans güç planını ve Uyku Kilidini (`SetThreadExecutionState`) yönetir.
 3. **Kulak Tırmalamayan Akustik Geri Bildirim (`SoundManager`):**
    - Harici ses dosyası kullanmadan, bellek üzerinde düşük frekanslı yumuşak dokunsal tıklama (`PlayClick`) ve tamamlanma akoru (`PlaySuccessChord`) üretir.
+Türkçe (Turkish)
+QOVX – Gizlilik PolitikasıSon Güncelleme Tarihi: 8 Kasım 2026
 
-## Tek Tıkla MSIX Paketleme
+QOVX (“Biz”, “Uygulama”), kullanıcılarımızın gizliliğine büyük bir önem verir. Bu gizlilik politikası, QOVX masaüstü uygulamasını kullandığınızda verilerinizin nasıl işlendiğini açıklamaktadır.
 
-Proje kök dizinindeki `build-msix.bat` (veya `TEK_TIKLA_MSIX_OLUSTUR.bat`) betiğine çift tıklayarak `ALLAHVERDCAN.QOVX_4.0.1.0_x64.msix` paketini doğrudan oluşturabilirsiniz.
+Veri Toplamama ve Yerel Çalışma: QOVX, tamamen yerel bir Windows (.NET 10 / WinUI 3) sistem optimizasyon aracıdır. Uygulama, cihazınızda gerçekleştirilen tüm bellek yönetimi, önbellek temizliği, başlangıç denetimi ve ağ işleçlerini yalnızca yerel sisteminizde yürütür.
+
+Telemetri ve Bulut Aktarımı Yoktur: Uygulama hiçbir surette kişisel verilerinizi, sistem kullanım alışkanlıklarınızı veya telemetri bilgilerini toplamaz, kaydetmez, analiz etmez veya harici sunuculara (buluta) aktarmaz. Tüm işlemler sizin kontrolünüzde, tamamen çevrimdışı ve güvenli bir ortamda gerçekleşir.
+
+İletişim: Gizlilik politikamız hakkında herhangi bir sorunuz olması durumunda, uygulama mağazası geliştirici profili üzerinden bizimle iletişime geçebilirsiniz.
+
+İngilizce (English)
+QOVX – Privacy PolicyEffective Date: November 8, 2026
+
+QOVX ("We", "Our", or "The Application") is committed to protecting your privacy. This privacy policy outlines how your data is handled when you use the QOVX desktop application.
+
+Zero Data Collection & Local Operation: QOVX is a native Windows (.NET 10 / WinUI 3) system optimization utility. All memory management, cache cleanup, startup auditing, and network operations performed by the application are executed strictly locally on your device.
+
+No Telemetry or Cloud Transmission: The application does not collect, store, analyze, or transmit any personal data, system usage habits, or telemetry information to external servers or the cloud. Everything operates entirely offline under your direct control.
+
+Contact: If you have any questions or concerns regarding our privacy practices, you may reach out to us via the developer profile on the application store.
