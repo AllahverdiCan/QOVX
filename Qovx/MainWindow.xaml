@@ -30,7 +30,7 @@
                     </Border>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="QOVX" FontWeight="ExtraBold" FontSize="17" Foreground="{DynamicResource TextWhite}"/>
-                        <TextBlock x:Name="TxtHeaderSubtitle" Text="System &amp; Network Control Suite v3.0.2" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                        <TextBlock x:Name="TxtHeaderSubtitle" Text="Performans &amp; Sistem Kontrol Merkezi v4.0.1" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -39,6 +39,10 @@
                 </Border>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="BtnModeSwitch" Click="BtnModeSwitch_Click" Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource AccentCyan}" BorderThickness="1.5" Margin="0,0,10,0" Padding="13,7">
+                        <TextBlock x:Name="TxtModeSwitch" Text="🛠️ Gelişmiş Mod (Pro)'ya Geç" FontWeight="Bold" FontSize="11.5" Foreground="{DynamicResource AccentCyan}"/>
+                    </Button>
+
                     <Button x:Name="BtnPinTop" Click="BtnPinTop_Click" Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource BorderDark}" Margin="0,0,8,0" Padding="10,7">
                         <TextBlock x:Name="TxtPinTop" Text="📌 Üstte Tut: Kapalı" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource TextWhite}"/>
                     </Button>
@@ -65,12 +69,12 @@
         <!-- BODY -->
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="245"/>
+                <ColumnDefinition x:Name="ColSidebar" Width="0"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- SIDEBAR NAVIGATION -->
-            <Border Grid.Column="0" Background="{DynamicResource BgSidebar}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,1,0" Padding="12,16">
+            <!-- SIDEBAR NAVIGATION (Visible in Pro Mode) -->
+            <Border x:Name="BdrSidebar" Grid.Column="0" Visibility="Collapsed" Background="{DynamicResource BgSidebar}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,0,1,0" Padding="12,16">
                 <StackPanel>
                     <Button x:Name="NavDash" Click="Nav_Click" Tag="Dash" Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource AccentCyan}" Margin="0,0,0,6" HorizontalContentAlignment="Left" Padding="12,10">
                         <TextBlock x:Name="NavTxtDash" Text="Sistem Özeti &amp; Hızlandır" FontWeight="SemiBold" FontSize="13"/>
@@ -104,8 +108,118 @@
             <!-- MAIN CONTENT AREA -->
             <Grid Grid.Column="1" Margin="24,18,24,18">
 
-                <!-- TAB 1: DASHBOARD -->
-                <Grid x:Name="TabDash" Visibility="Visible">
+                <!-- SIMPLE MODE (AKILLI MOD - DEFAULT) -->
+                <Grid x:Name="GridSimpleMode" Visibility="Visible">
+                    <Border Background="{DynamicResource CardDark}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1.5" CornerRadius="18" Padding="34,26">
+                        <Grid>
+                            <!-- Subtle Ambient Acrylic/Glass Glow Accent -->
+                            <Ellipse Width="340" Height="340" Fill="{DynamicResource AccentCyan}" Opacity="0.07" HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10,0,0" IsHitTestVisible="False"/>
+
+                            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="680">
+                                <!-- Top Mode Badge -->
+                                <Border Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource AccentCyan}" BorderThickness="1" CornerRadius="14" Padding="14,5" HorizontalAlignment="Center" Margin="0,0,0,14">
+                                    <TextBlock x:Name="TxtSimpleBadge" Text="⚡ AKILLI OPTİMİZASYON MERKEZİ • %100 YEREL MİMARİ" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentCyan}"/>
+                                </Border>
+
+                                <!-- Clean Status Headline -->
+                                <TextBlock x:Name="TxtSimpleHeroState" Text="Sisteminiz optimize ve akıcı" FontSize="26" FontWeight="ExtraBold" Foreground="{DynamicResource TextWhite}" HorizontalAlignment="Center" TextAlignment="Center"/>
+                                <TextBlock x:Name="TxtSimpleHeroSub" Text="Tek dokunuşla uygulama önbelleklerini, çökme dökümlerini, pasif bellek sayfalarını ve başlangıç yükünü güvenle optimize edin." FontSize="13" Foreground="{DynamicResource TextMuted}" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap" Margin="0,6,0,22"/>
+
+                                <!-- Giant Tactile Smart Boost Button with Pulsing Ring & Rotating Progress Arc -->
+                                <Grid Width="210" Height="210" HorizontalAlignment="Center" Margin="0,0,0,20">
+                                    <Ellipse x:Name="EllSimplePulseRing" Width="204" Height="204" Stroke="{DynamicResource AccentCyan}" StrokeThickness="2" Opacity="0.28" RenderTransformOrigin="0.5,0.5">
+                                        <Ellipse.RenderTransform>
+                                            <ScaleTransform x:Name="ScaleSimplePulseRing" ScaleX="1.0" ScaleY="1.0"/>
+                                        </Ellipse.RenderTransform>
+                                    </Ellipse>
+
+                                    <Ellipse x:Name="EllSimpleSpinRing" Width="192" Height="192" Stroke="{DynamicResource AccentEmerald}" StrokeThickness="3.5" StrokeDashArray="16 10" Visibility="Collapsed" RenderTransformOrigin="0.5,0.5">
+                                        <Ellipse.RenderTransform>
+                                            <RotateTransform x:Name="RotSimpleSpinRing" Angle="0"/>
+                                        </Ellipse.RenderTransform>
+                                    </Ellipse>
+
+                                    <Button x:Name="BtnSimpleSmartBoost" Click="BtnSimpleSmartBoost_Click" Width="174" Height="174" Background="#0EA5E9" BorderBrush="#38BDF8" BorderThickness="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="BoostOrbBorder" Width="174" Height="174" CornerRadius="87" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="BoostOrbBorder" Property="Background" Value="#38BDF8"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsPressed" Value="True">
+                                                        <Setter TargetName="BoostOrbBorder" Property="Opacity" Value="0.85"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter TargetName="BoostOrbBorder" Property="Background" Value="#1E293B"/>
+                                                        <Setter TargetName="BoostOrbBorder" Property="BorderBrush" Value="#0EA5E9"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <Path Data="M13,2 L4,14 H11 L10,22 L20,10 H13 Z" Fill="#090B10" Width="28" Height="28" Stretch="Uniform" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                                            <TextBlock x:Name="TxtBtnSimpleBoostMain" Text="SİSTEMİ" FontSize="15" FontWeight="ExtraBold" Foreground="#090B10" HorizontalAlignment="Center"/>
+                                            <TextBlock x:Name="TxtBtnSimpleBoostSub" Text="OPTİMİZE ET" FontSize="15" FontWeight="ExtraBold" Foreground="#090B10" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Button>
+                                </Grid>
+
+                                <!-- 3 Minimal Live Telemetry Pills -->
+                                <WrapPanel HorizontalAlignment="Center" Margin="0,0,0,14">
+                                    <Border Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="14,7" Margin="4,0">
+                                        <TextBlock x:Name="TxtSimplePillRam" Text="Bellek Yükü: Ölçülüyor..." FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentCyan}"/>
+                                    </Border>
+                                    <Border Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="14,7" Margin="4,0">
+                                        <TextBlock x:Name="TxtSimplePillCache" Text="Geçici Önbellek: Taranıyor..." FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentAmber}"/>
+                                    </Border>
+                                    <Border Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="14,7" Margin="4,0">
+                                        <TextBlock x:Name="TxtSimplePillStartup" Text="Başlangıç Öğesi: Denetleniyor..." FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentEmerald}"/>
+                                    </Border>
+                                </WrapPanel>
+
+                                <!-- Step-by-Step Progress Panel (Visible During Optimization) -->
+                                <Border x:Name="BdrSimpleProgressCard" Visibility="Collapsed" Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource AccentCyan}" BorderThickness="1" CornerRadius="10" Padding="18,12" Width="560" Margin="0,0,0,12">
+                                    <StackPanel>
+                                        <DockPanel Margin="0,0,0,6">
+                                            <TextBlock x:Name="TxtSimpleStageLabel" Text="Önbellekler taranıyor..." FontSize="12.5" FontWeight="SemiBold" Foreground="{DynamicResource TextWhite}"/>
+                                            <TextBlock x:Name="TxtSimplePercent" Text="0%" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AccentCyan}" HorizontalAlignment="Right" DockPanel.Dock="Right"/>
+                                        </DockPanel>
+                                        <ProgressBar x:Name="PbSimpleBoost" Height="9" Minimum="0" Maximum="100" Value="0" Foreground="{DynamicResource AccentCyan}" Background="{DynamicResource BorderDark}" BorderThickness="0"/>
+                                    </StackPanel>
+                                </Border>
+
+                                <!-- Animated Success Card (Fade-In & Scale-Up + Glowing Checkmark) -->
+                                <Border x:Name="BdrSimpleSuccessCard" Visibility="Collapsed" Background="{DynamicResource CardDarkHover}" BorderBrush="#10B981" BorderThickness="1.5" CornerRadius="12" Padding="18,14" Width="600" RenderTransformOrigin="0.5,0.5">
+                                    <Border.RenderTransform>
+                                        <ScaleTransform x:Name="ScaleSimpleSuccessCard" ScaleX="0.92" ScaleY="0.92"/>
+                                    </Border.RenderTransform>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Border x:Name="BdrSuccessCheckBadge" Grid.Column="0" Width="42" Height="42" CornerRadius="21" Background="#10B981" VerticalAlignment="Center" Margin="0,0,14,0" RenderTransformOrigin="0.5,0.5">
+                                            <Border.RenderTransform>
+                                                <ScaleTransform x:Name="ScaleSuccessCheckBadge" ScaleX="1.0" ScaleY="1.0"/>
+                                            </Border.RenderTransform>
+                                            <Path Data="M6,12.5 L10.5,17 L18.5,8" Stroke="#061410" StrokeThickness="2.8" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                            <TextBlock x:Name="TxtSimpleSuccessTitle" Text="Optimizasyon Başarıyla Tamamlandı" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentEmerald}"/>
+                                            <TextBlock x:Name="TxtSimpleSuccessReport" Text="Sistem hızı optimize edildi." FontSize="12" Foreground="{DynamicResource TextWhite}" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                        </StackPanel>
+                                    </Grid>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+                </Grid>
+
+                <!-- TAB 1: DASHBOARD (PRO MODE) -->
+                <Grid x:Name="TabDash" Visibility="Collapsed">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -155,7 +269,7 @@
                                 <TextBlock x:Name="TxtBtnMaster" Text="HIZLI BAKIM VE ÖNBELLEK TEMİZLİĞİNİ BAŞLAT" FontSize="15" FontWeight="Bold" Foreground="#090B10"/>
                             </Button>
                             <TextBlock x:Name="TxtBoostStatus" Text="Kritik sistem süreçlerini koruyarak kullanıcı süreçlerinin çalışma kümelerini daraltır, kilitsiz %TEMP% dosyalarını siler ve DNS önbelleğini sıfırlar." HorizontalAlignment="Center" Margin="0,14,0,0" FontSize="12.5" Foreground="{DynamicResource TextMuted}" TextWrapping="Wrap" TextAlignment="Center"/>
-                            <Border x:Name="BdrBoostProgressPanel" Visibility="Collapsed" Background="#0D111A" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="16,12" Width="540" Margin="0,14,0,0">
+                            <Border x:Name="BdrBoostProgressPanel" Visibility="Collapsed" Background="{DynamicResource CardDarkHover}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" CornerRadius="8" Padding="16,12" Width="540" Margin="0,14,0,0">
                                 <StackPanel>
                                     <DockPanel Margin="0,0,0,6">
                                         <TextBlock x:Name="TxtBoostStageLabel" Text="Sistem bakım adımları yürütülüyor..." FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextWhite}"/>
@@ -210,7 +324,7 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <TextBlock x:Name="TxtTopProcHeader" Grid.Row="0" Text="En Çok Bellek Tüketen Aktif Süreçler (İlk 15 • PID ve Başlangıç Zamanı Doğrulamalı)" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,8"/>
-                            <ListBox x:Name="LstTopProcesses" Grid.Row="1" Background="#0D1017" Foreground="{DynamicResource TextWhite}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
+                            <ListBox x:Name="LstTopProcesses" Grid.Row="1" Background="{DynamicResource BgSidebar}" Foreground="{DynamicResource TextWhite}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
                         </Grid>
                     </Border>
                 </Grid>
@@ -264,6 +378,7 @@
                                 <CheckBox x:Name="ChkUpdateCache" Content="İndirilenler &amp; Belgeler SHA-256 Kopya Taraması" IsChecked="True" Foreground="{DynamicResource TextWhite}" Margin="0,0,18,6"/>
                                 <CheckBox x:Name="ChkThumbnails" Content="DirectX Shader (D3DSCache) Önbelleği" IsChecked="True" Foreground="{DynamicResource TextWhite}" Margin="0,0,18,6"/>
                                 <CheckBox x:Name="ChkBrowserCache" Content="Tarayıcı Önbellekleri (Yalnızca Kapalıysa Temizlenir)" IsChecked="True" Foreground="{DynamicResource TextWhite}" Margin="0,0,18,6"/>
+                                <CheckBox x:Name="ChkCrashDumps" Content="Uygulama Çökme Dökümleri (CrashDumps &amp; WER Raporları)" IsChecked="True" Foreground="{DynamicResource TextWhite}" Margin="0,0,18,6"/>
                             </WrapPanel>
 
                             <WrapPanel>
@@ -295,7 +410,7 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <TextBlock x:Name="TxtDupListHeader" Grid.Row="0" Text="Tespit Edilen SHA-256 Kopya Dosyalar (Kopya Konumu ➔ Orijinal Dosya Konumu)" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,6"/>
-                            <ListBox x:Name="LstDuplicates" Grid.Row="1" Background="#0D1017" Foreground="{DynamicResource TextWhite}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
+                            <ListBox x:Name="LstDuplicates" Grid.Row="1" Background="{DynamicResource BgSidebar}" Foreground="{DynamicResource TextWhite}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
                         </Grid>
                     </Border>
                 </Grid>
@@ -338,7 +453,7 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <TextBlock x:Name="TxtAdapterHeader" Grid.Row="0" Text="Aktif Ağ Adaptörleri, Yerel IPv4, DNS Sunucuları ve Ağ Geçidi Bilgileri" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,8"/>
-                            <ListBox x:Name="LstNetAdapters" Grid.Row="1" Background="#0D1017" Foreground="{DynamicResource TextWhite}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
+                            <ListBox x:Name="LstNetAdapters" Grid.Row="1" Background="{DynamicResource BgSidebar}" Foreground="{DynamicResource TextWhite}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
                         </Grid>
                     </Border>
                 </Grid>
@@ -370,8 +485,14 @@
                                 <Button x:Name="BtnRevertPrivacy" Click="BtnRevertPrivacy_Click" Background="{DynamicResource AccentAmber}" BorderThickness="0" Margin="0,0,10,6">
                                     <TextBlock x:Name="TxtBtnRevertPrivacy" Text="Kaydedilen Önceki Kullanıcı Durumuna Geri Yükle" FontWeight="Bold" Foreground="#090B10"/>
                                 </Button>
-                                <Button x:Name="BtnRefreshStartup" Click="BtnRefreshStartup_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,0,6">
+                                <Button x:Name="BtnRefreshStartup" Click="BtnRefreshStartup_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,10,6">
                                     <TextBlock x:Name="TxtBtnRefreshStartup" Text="Başlangıç Listesini Yenile" FontWeight="SemiBold"/>
+                                </Button>
+                                <Button x:Name="BtnToggleStartupItem" Click="BtnToggleStartupItem_Click" Background="{DynamicResource AccentCyan}" BorderThickness="0" Margin="0,0,10,6">
+                                    <TextBlock x:Name="TxtBtnToggleStartupItem" Text="Seçili Başlangıç Öğesini Duraklat / Etkinleştir" FontWeight="Bold" Foreground="#090B10"/>
+                                </Button>
+                                <Button x:Name="BtnAuditScheduledTasks" Click="BtnAuditScheduledTasks_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,0,6">
+                                    <TextBlock x:Name="TxtBtnAuditScheduledTasks" Text="Görev Zamanlayıcısı Denetimi" FontWeight="SemiBold"/>
                                 </Button>
                             </WrapPanel>
                             <TextBlock x:Name="TxtPrivResult" Text="" Margin="0,8,0,0" FontSize="12" Foreground="{DynamicResource AccentEmerald}" TextWrapping="Wrap"/>
@@ -385,7 +506,7 @@
                                 <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
                             <TextBlock x:Name="TxtStartupListHeader" Grid.Row="0" Text="Salt Okunur Başlangıç Denetimi (HKCU/HKLM Run, RunOnce ve Startup Klasörleri)" FontWeight="SemiBold" FontSize="13" Margin="0,0,0,8"/>
-                            <ListBox x:Name="LstStartupApps" Grid.Row="1" Background="#0D1017" Foreground="{DynamicResource TextWhite}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
+                            <ListBox x:Name="LstStartupApps" Grid.Row="1" Background="{DynamicResource BgSidebar}" Foreground="{DynamicResource TextWhite}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="1" FontFamily="Consolas" FontSize="12"/>
                         </Grid>
                     </Border>
                 </Grid>
@@ -408,6 +529,16 @@
                                     </Button>
                                     <Button x:Name="BtnRestoreBalancedPower" Click="BtnRestoreBalancedPower_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,0,8">
                                         <TextBlock x:Name="TxtBtnRestoreBalancedPower" Text="Standart Dengeli (Balanced) Güç Planına Dön" FontWeight="SemiBold"/>
+                                    </Button>
+                                </WrapPanel>
+
+                                <TextBlock x:Name="TxtVisualPerfHeader" Text="Görsel Performans Ayarları (Windows Arayüz ve Animasyon Hızlandırma)" FontWeight="SemiBold" FontSize="14" Margin="0,4,0,10"/>
+                                <WrapPanel Margin="0,0,0,16">
+                                    <Button x:Name="BtnVisualBestPerf" Click="BtnVisualBestPerf_Click" Background="{DynamicResource AccentEmerald}" BorderThickness="0" Margin="0,0,10,8">
+                                        <TextBlock x:Name="TxtBtnVisualBestPerf" Text="En İyi Performans Moduna Geç (Hantal Efektleri Kapat)" FontWeight="Bold" Foreground="#090B10"/>
+                                    </Button>
+                                    <Button x:Name="BtnVisualRestoreDefault" Click="BtnVisualRestoreDefault_Click" Background="{DynamicResource CardDarkHover}" Margin="0,0,0,8">
+                                        <TextBlock x:Name="TxtBtnVisualRestoreDefault" Text="Görsel Efektleri Varsayılan Kaliteye Döndür" FontWeight="SemiBold"/>
                                     </Button>
                                 </WrapPanel>
 
@@ -439,7 +570,7 @@
         <!-- FOOTER BAR -->
         <Border Grid.Row="2" Background="{DynamicResource BgFooter}" BorderBrush="{DynamicResource BorderDark}" BorderThickness="0,1,0,0" Padding="20,0">
             <Grid VerticalAlignment="Center">
-                <TextBlock x:Name="TxtFooterLeft" Text="QOVX v3.0.2 • Yayıncı: ALLAHVERDİ CAN • %100 Yerel Mimari" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
+                <TextBlock x:Name="TxtFooterLeft" Text="QOVX v4.0.1.1 • Yayıncı: ALLAHVERDİ CAN • %100 Yerel Mimari" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
                 <TextBlock x:Name="TxtFooterRight" HorizontalAlignment="Right" Text="Windows 10 / 11 x64 Native (.NET 10 LTS)" FontSize="11" Foreground="{DynamicResource TextMuted}"/>
             </Grid>
         </Border>

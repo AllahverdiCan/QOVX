@@ -16,11 +16,11 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyDescriptionAttribute(("Native Windows physical memory working-set trimmer, safe storage cache & SHA-256 " +
     "duplicate manager, UDP/TCP DNS resolver benchmark, reversible privacy rules, and" +
     " power control suite."))]
-[assembly: System.Reflection.AssemblyFileVersionAttribute("3.0.2.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("3.0.2.0")]
+[assembly: System.Reflection.AssemblyFileVersionAttribute("4.0.1.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("4.0.1.0")]
 [assembly: System.Reflection.AssemblyProductAttribute("QOVX - Windows System & Network Control Suite")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Qovx")]
-[assembly: System.Reflection.AssemblyVersionAttribute("3.0.2.0")]
+[assembly: System.Reflection.AssemblyVersionAttribute("4.0.1.0")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows10.0.19041.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows10.0.19041.0")]
 

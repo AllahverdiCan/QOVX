@@ -1,4 +1,4 @@
-# QOVX v3.0.0.0 — KAPSAMLI KOD DENETİMİ, DERLEME HATASI ÇÖZÜMÜ, GÜVENLİK VE MSIX DOĞRULAMA RAPORU
+# QOVX v4.0.1.0 — KAPSAMLI KOD DENETİMİ, DERLEME HATASI ÇÖZÜMÜ, GÜVENLİK VE MSIX DOĞRULAMA RAPORU
 
 - **Proje Adı:** QOVX (`System & Network Control Suite`)
 - **Geliştirici / Yayıncı:** ALLAHVERDİ CAN (`https://www.youtube.com/@ALLAHVERDICAN`)
@@ -6,7 +6,7 @@
 - **Package/Identity/Name:** `ALLAHVERDCAN.QOVX`
 - **Package/Identity/Publisher:** `CN=80F86ABB-4ABB-4524-A032-0CE77FF05712`
 - **Package/Properties/PublisherDisplayName:** `ALLAHVERDİ CAN`
-- **Hedef Sürüm:** `3.0.0.0` (Önceki Store Sürümü: `2.0.4.0`)
+- **Hedef Sürüm:** `4.0.1.0` (Önceki Store Sürümü: `2.0.4.0`)
 - **Hedef Çerçeve & Mimari:** `.NET 10 LTS` (`net10.0-windows10.0.19041.0`), `win-x64`, `UseWPF=true`, `Nullable=enable`, `ImplicitUsings=enable`
 
 ## 1. Giderilen 25 Derleme Hatasının (CS1010, CS1003, CS1525, CS1026, CS8087, CS1009) Kök Neden ve Çözüm Tablosu
@@ -47,6 +47,6 @@
 | :--- | :--- | :--- |
 | 25 C# Derleme Hatasının (CS1010/CS1003/CS1525/CS1026/CS8087/CS1009) Giderilmesi | **DOĞRULANDI** | Python tabanlı C# string/char/escape leksikal ayrıştırıcısı ile `App.xaml.cs` ve `MainWindow.xaml.cs` üzerinde 0 hata doğrulandı. |
 | XAML ve C# Olay (`Click`) / Kontrol (`x:Name`) Eşleşmesi | **DOĞRULANDI** | 25 `Click` olay işleyicisi ve 96 `x:Name` kontrolünün tamamı `MainWindow.xaml` ve `MainWindow.xaml.cs` arasında birebir doğrulandı. |
-| Microsoft Store Sabit Kimlik Doğrulaması (`Package.appxmanifest`) | **DOĞRULANDI** | `ALLAHVERDCAN.QOVX`, `CN=80F86ABB-4ABB-4524-A032-0CE77FF05712`, `ALLAHVERDİ CAN`, `Version="3.0.0.0"` doğrulandı. |
+| Microsoft Store Sabit Kimlik Doğrulaması (`Package.appxmanifest`) | **DOĞRULANDI** | `ALLAHVERDCAN.QOVX`, `CN=80F86ABB-4ABB-4524-A032-0CE77FF05712`, `ALLAHVERDİ CAN`, `Version="4.0.1.0"` doğrulandı. |
 | MSIX Görsel Varlıkları (PNG İmza ve Boyut Kontrolü) | **DOĞRULANDI** | `StoreLogo.png` (50x50), `Square44x44Logo.png` (44x44), `Square150x150Logo.png` (150x150), `Wide310x150Logo.png` (310x150), `SplashScreen.png` (620x300) doğrulandı. |
 | Fiziksel Windows 10/11 Ortamında `dotnet publish` ve `makeappx pack` | **DOĞRULANAMADI** | Bulut inceleme ortamı Linux tabanlı olduğundan fiziksel `dotnet.exe` ve `makeappx.exe` çalıştırması kullanıcı bilgisayarında `build-msix.bat` ile yapılmalıdır. |

@@ -222,34 +222,34 @@ namespace Qovx
 
         public static void PlayClick()
         {
-            // Soft marimba pop (D5 -> A5 micro-tap)
+            // Soft low-frequency tactile acoustic tap (240 Hz -> 320 Hz damped pulse, zero ear fatigue)
             byte[] wav = BuildMarimbaWav(new[]
             {
-                (587.33, 0.000, 0.045, 0.16),
-                (880.00, 0.012, 0.040, 0.11)
-            }, 0.060);
+                (240.00, 0.000, 0.032, 0.11),
+                (320.00, 0.008, 0.028, 0.08)
+            }, 0.042);
             PlayWavAsync(wav);
         }
 
         public static void PlayStageTick()
         {
-            // Subtle progress step tick (E5)
+            // Subtle low-mid progress pulse (293.66 Hz D4)
             byte[] wav = BuildMarimbaWav(new[]
             {
-                (659.25, 0.000, 0.038, 0.12)
-            }, 0.045);
+                (293.66, 0.000, 0.034, 0.09)
+            }, 0.040);
             PlayWavAsync(wav);
         }
 
         public static void PlaySuccessChord()
         {
-            // Warm macOS-style ascending C5 - E5 - G5 - C6 marimba chord
+            // Warm acoustic low-mid completion triad (C4 -> G4 -> E5 gentle fade-out)
             byte[] wav = BuildMarimbaWav(new[]
             {
-                (523.25, 0.000, 0.180, 0.18),
-                (659.25, 0.055, 0.180, 0.18),
-                (783.99, 0.110, 0.220, 0.20),
-                (1046.50, 0.165, 0.260, 0.16)
+                (261.63, 0.000, 0.170, 0.13),
+                (392.00, 0.055, 0.190, 0.13),
+                (523.25, 0.110, 0.220, 0.14),
+                (659.25, 0.165, 0.260, 0.12)
             }, 0.440);
             PlayWavAsync(wav);
         }
@@ -268,11 +268,23 @@ namespace Qovx
 
     public partial class MainWindow : Window
     {
+        public sealed class StartupEntryRecord
+        {
+            public string Scope { get; set; } = string.Empty;
+            public string Name { get; set; } = string.Empty;
+            public string Command { get; set; } = string.Empty;
+            public bool IsHkcuRun { get; set; }
+            public bool IsEnabled { get; set; } = true;
+        }
+
         private bool _isEnglish = false;
+        private bool _isProMode = false;
         private bool _isCaffeineActive = false;
         private bool _isSoundEnabled = true;
         private bool _isLightTheme = false;
         private volatile bool _isWindowClosing = false;
+        private readonly List<StartupEntryRecord> _startupEntries = new List<StartupEntryRecord>();
+        private int _lastAuditedTasksCount = 0;
 
         // Thread-safe operation guards (Interlocked: 0 = idle, 1 = busy)
         private int _ramBusyFlag = 0;
@@ -402,6 +414,23 @@ namespace Qovx
                     UpdateRealHardwareMetrics();
             };
             _telemetryTimer.Start();
+            StartSimpleIdlePulseAnimation();
+        }
+
+        private void StartSimpleIdlePulseAnimation()
+        {
+            try
+            {
+                var pulse = new DoubleAnimation(1.0, 1.055, TimeSpan.FromMilliseconds(1600))
+                {
+                    AutoReverse = true,
+                    RepeatBehavior = RepeatBehavior.Forever,
+                    EasingFunction = new SineEase { EasingMode = EasingMode.EaseInOut }
+                };
+                ScaleSimplePulseRing.BeginAnimation(ScaleTransform.ScaleXProperty, pulse);
+                ScaleSimplePulseRing.BeginAnimation(ScaleTransform.ScaleYProperty, pulse);
+            }
+            catch { }
         }
 
         private void MainWindow_Closing(object? sender, CancelEventArgs e)
@@ -543,6 +572,16 @@ namespace Qovx
                 TxtHardwareSummary.Text = _isEnglish
                     ? $"Machine: {Environment.MachineName} • OS: {Environment.OSVersion.VersionString} • 64-Bit Native Process"
                     : $"Cihaz: {Environment.MachineName} • İS: {Environment.OSVersion.VersionString} • 64-Bit Yerel Süreç";
+
+                if (totalGb > 0)
+                {
+                    TxtSimplePillRam.Text = _isEnglish
+                        ? $"Memory Load: {load}% ({availGb:F1} GB Free)"
+                        : $"Bellek Yükü: %{load} ({availGb:F1} GB Boş)";
+                }
+                TxtSimplePillStartup.Text = _isEnglish
+                    ? $"Startup Apps: {_startupEntries.Count(x => x.IsEnabled)} Active"
+                    : $"Başlangıç Öğesi: {_startupEntries.Count(x => x.IsEnabled)} Aktif";
             }
             catch (Exception ex)
             {
@@ -572,6 +611,28 @@ namespace Qovx
             return Path.Combine(winDir, "Temp");
         }
 
+        private static string[] GetCrashDumpDirectories()
+        {
+            string localApp = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            return new[]
+            {
+                Path.Combine(localApp, "CrashDumps"),
+                Path.Combine(localApp, @"Microsoft\Windows\WER\ReportArchive"),
+                Path.Combine(localApp, @"Microsoft\Windows\WER\ReportQueue")
+            };
+        }
+
+        private static long GetCrashDumpsSizeSafe(CancellationToken token = default)
+        {
+            long sum = 0;
+            foreach (string dir in GetCrashDumpDirectories())
+            {
+                if (token.IsCancellationRequested) break;
+                sum += GetDirectorySizeSafe(dir, token);
+            }
+            return sum;
+        }
+
         private void CalculateInitialTempSizeAsync()
         {
             CancellationToken token = _appLifetimeCts?.Token ?? CancellationToken.None;
@@ -581,6 +642,7 @@ namespace Qovx
                 long bytes = GetDirectorySizeSafe(Path.GetTempPath(), token);
                 string d3dCache = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "D3DSCache");
                 bytes += GetDirectorySizeSafe(d3dCache, token);
+                bytes += GetCrashDumpsSizeSafe(token);
                 bytes += GetBrowserCachesSizeSafe(token, out _);
 
                 if (token.IsCancellationRequested || _isWindowClosing) return;
@@ -595,6 +657,9 @@ namespace Qovx
             string cacheStr = cacheMb >= 1024.0 ? $"{(cacheMb / 1024.0):F2} GB" : $"{cacheMb:F1} MB";
             ValTempSize.Text = cacheStr;
             TxtMetricCurrentCache.Text = cacheStr;
+            TxtSimplePillCache.Text = _isEnglish
+                ? $"Temp & Dump Cache: {cacheStr}"
+                : $"Geçici Önbellek: {cacheStr}";
 
             double freedMb = _lastActuallyFreedBytes / (1024.0 * 1024.0);
             TxtMetricFreedSpace.Text = _isEnglish
@@ -1026,6 +1091,212 @@ namespace Qovx
             }
         }
 
+        private void BtnModeSwitch_Click(object sender, RoutedEventArgs e)
+        {
+            _isProMode = !_isProMode;
+            PlayUiFeedbackSound(false);
+
+            if (_isProMode)
+            {
+                GridSimpleMode.Visibility = Visibility.Collapsed;
+                ColSidebar.Width = new GridLength(245);
+                BdrSidebar.Visibility = Visibility.Visible;
+                TabDash.Visibility = Visibility.Visible;
+                TabRam.Visibility = Visibility.Collapsed;
+                TabDisk.Visibility = Visibility.Collapsed;
+                TabNet.Visibility = Visibility.Collapsed;
+                TabPriv.Visibility = Visibility.Collapsed;
+                TabStart.Visibility = Visibility.Collapsed;
+                ResetNavButtons();
+                NavDash.Background = (Brush)FindResource("CardDarkHover");
+                NavDash.BorderBrush = (Brush)FindResource("AccentCyan");
+                NavDash.BorderThickness = new Thickness(1);
+                if (NavDash.Content is TextBlock tb)
+                {
+                    tb.Foreground = (Brush)FindResource("TextWhite");
+                    tb.FontWeight = FontWeights.SemiBold;
+                }
+                ApplyTabTransitionAnimation(TabDash);
+            }
+            else
+            {
+                ColSidebar.Width = new GridLength(0);
+                BdrSidebar.Visibility = Visibility.Collapsed;
+                TabDash.Visibility = Visibility.Collapsed;
+                TabRam.Visibility = Visibility.Collapsed;
+                TabDisk.Visibility = Visibility.Collapsed;
+                TabNet.Visibility = Visibility.Collapsed;
+                TabPriv.Visibility = Visibility.Collapsed;
+                TabStart.Visibility = Visibility.Collapsed;
+                GridSimpleMode.Visibility = Visibility.Visible;
+                ApplyTabTransitionAnimation(GridSimpleMode);
+            }
+            UpdateHeaderButtonsLocalization();
+        }
+
+        private async void BtnSimpleSmartBoost_Click(object sender, RoutedEventArgs e)
+        {
+            if (Interlocked.CompareExchange(ref _ramBusyFlag, 1, 0) != 0) return;
+            if (Interlocked.CompareExchange(ref _diskBusyFlag, 1, 0) != 0)
+            {
+                Interlocked.Exchange(ref _ramBusyFlag, 0);
+                return;
+            }
+            if (Interlocked.CompareExchange(ref _netBusyFlag, 1, 0) != 0)
+            {
+                Interlocked.Exchange(ref _diskBusyFlag, 0);
+                Interlocked.Exchange(ref _ramBusyFlag, 0);
+                return;
+            }
+
+            BtnSimpleSmartBoost.IsEnabled = false;
+            BdrSimpleSuccessCard.Visibility = Visibility.Collapsed;
+            BdrSimpleProgressCard.Visibility = Visibility.Visible;
+            EllSimpleSpinRing.Visibility = Visibility.Visible;
+
+            var spinAnim = new DoubleAnimation(0, 360, TimeSpan.FromMilliseconds(1150))
+            {
+                RepeatBehavior = RepeatBehavior.Forever
+            };
+            RotSimpleSpinRing.BeginAnimation(RotateTransform.AngleProperty, spinAnim);
+
+            PbSimpleBoost.BeginAnimation(System.Windows.Controls.Primitives.RangeBase.ValueProperty, null);
+            PbSimpleBoost.Value = 0;
+            TxtSimplePercent.Text = "0%";
+            PlayUiFeedbackSound(false);
+
+            var cleanReport = new CleanupOperationReport();
+            bool dnsFlushed = false;
+            int startupCount = 0;
+            CancellationToken lifetimeToken = _appLifetimeCts?.Token ?? CancellationToken.None;
+
+            try
+            {
+                // Step 1: AppTemp, CrashDumps & Shader Cache Cleanup
+                TxtSimpleStageLabel.Text = _isEnglish
+                    ? "Scanning and cleaning temporary caches & crash dumps..."
+                    : "Önbellekler ve çökme dökümleri (AppTemp / CrashDumps) temizleniyor...";
+                TxtSimpleHeroState.Text = _isEnglish ? "Optimizing System..." : "Sistem Optimize Ediliyor...";
+                await AnimateProgressBarToAsync(PbSimpleBoost, 30, 260, TxtSimplePercent);
+                if (_isWindowClosing || lifetimeToken.IsCancellationRequested) return;
+
+                cleanReport = await Task.Run(() =>
+                {
+                    var total = new CleanupOperationReport();
+                    var targets = new List<string>
+                    {
+                        Path.GetTempPath(),
+                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "D3DSCache")
+                    };
+                    targets.AddRange(GetCrashDumpDirectories());
+                    foreach (string dir in targets)
+                    {
+                        var r = CleanDirectoryDetailedSafe(dir, lifetimeToken);
+                        total.DeletedFiles += r.DeletedFiles;
+                        total.LockedSkippedFiles += r.LockedSkippedFiles;
+                        total.RemovedEmptyDirs += r.RemovedEmptyDirs;
+                        total.FreedBytes += r.FreedBytes;
+                    }
+                    return total;
+                }, lifetimeToken);
+                PlayStageTickSound();
+
+                // Step 2: Physical Memory Working-Set Trim
+                TxtSimpleStageLabel.Text = _isEnglish
+                    ? "Trimming inactive user process working-set pages..."
+                    : "Pasif bellek çalışma kümeleri (Working-Set) daraltılıyor...";
+                await AnimateProgressBarToAsync(PbSimpleBoost, 62, 260, TxtSimplePercent);
+                if (_isWindowClosing || lifetimeToken.IsCancellationRequested) return;
+
+                _lastRamReport = await Task.Run(() => ExecuteWorkingSetTrimCore(), lifetimeToken);
+                PlayStageTickSound();
+
+                // Step 3: Startup & Background Task Audit
+                TxtSimpleStageLabel.Text = _isEnglish
+                    ? "Auditing startup items and background task triggers..."
+                    : "Başlangıç öğeleri ve arka plan görevleri denetleniyor...";
+                await AnimateProgressBarToAsync(PbSimpleBoost, 86, 220, TxtSimplePercent);
+                if (_isWindowClosing || lifetimeToken.IsCancellationRequested) return;
+
+                RefreshStartupAppsList();
+                startupCount = _startupEntries.Count;
+                PlayStageTickSound();
+
+                // Step 4: DNS Resolver Flush & Completion
+                TxtSimpleStageLabel.Text = _isEnglish
+                    ? "Flushing DNS resolver cache & verifying telemetry..."
+                    : "DNS çözümleyici önbelleği ve sistem yanıt süresi doğrulanıyor...";
+                await AnimateProgressBarToAsync(PbSimpleBoost, 100, 200, TxtSimplePercent);
+                if (_isWindowClosing || lifetimeToken.IsCancellationRequested) return;
+
+                dnsFlushed = await FlushDnsResolverVerifiedAsync();
+
+                _lastActuallyFreedBytes += cleanReport.FreedBytes;
+                _lastActuallyFreedFiles += cleanReport.DeletedFiles;
+                UpdateRealHardwareMetrics();
+                RenderRamLastReportText();
+                CalculateInitialTempSizeAsync();
+                RefreshTopProcessesList();
+
+                double freedMb = cleanReport.FreedBytes / (1024.0 * 1024.0);
+                TxtSimpleHeroState.Text = _isEnglish
+                    ? "Your system is optimized and responsive"
+                    : "Sisteminiz optimize ve akıcı";
+
+                TxtSimpleSuccessTitle.Text = _isEnglish
+                    ? "✓ Smart System Optimization Completed"
+                    : "✓ Akıllı Sistem Optimizasyonu Tamamlandı";
+                TxtSimpleSuccessReport.Text = _isEnglish
+                    ? $"{startupCount} startup apps audited • {freedMb:F2} MB cache & crash dumps cleaned ({cleanReport.DeletedFiles} files) • {_lastRamReport.SuccessfulApiCalls} user apps memory-trimmed • DNS cache {(dnsFlushed ? "flushed" : "checked")}."
+                    : $"{startupCount} başlangıç uygulaması denetlendi • {freedMb:F2} MB önbellek ve çöp dosya temizlendi ({cleanReport.DeletedFiles} dosya) • {_lastRamReport.SuccessfulApiCalls} süreçte bellek optimize edildi — Sistem hızı optimize edildi.";
+
+                BdrSimpleProgressCard.Visibility = Visibility.Collapsed;
+                ShowSimpleSuccessCardAnimated();
+                PlayUiFeedbackSound(true);
+            }
+            catch (Exception ex)
+            {
+                App.LogDiagnosticEvent("SIMPLE_BOOST", ex.Message);
+            }
+            finally
+            {
+                RotSimpleSpinRing.BeginAnimation(RotateTransform.AngleProperty, null);
+                EllSimpleSpinRing.Visibility = Visibility.Collapsed;
+                if (!_isWindowClosing)
+                {
+                    BtnSimpleSmartBoost.IsEnabled = true;
+                }
+                Interlocked.Exchange(ref _netBusyFlag, 0);
+                Interlocked.Exchange(ref _diskBusyFlag, 0);
+                Interlocked.Exchange(ref _ramBusyFlag, 0);
+            }
+        }
+
+        private void ShowSimpleSuccessCardAnimated()
+        {
+            BdrSimpleSuccessCard.Opacity = 0;
+            BdrSimpleSuccessCard.Visibility = Visibility.Visible;
+
+            var fadeIn = new DoubleAnimation(0.0, 1.0, TimeSpan.FromMilliseconds(280))
+            {
+                EasingFunction = new CubicEase { EasingMode = EasingMode.EaseOut }
+            };
+            var scaleUp = new DoubleAnimation(0.90, 1.0, TimeSpan.FromMilliseconds(320))
+            {
+                EasingFunction = new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.35 }
+            };
+            var badgePop = new DoubleAnimation(0.65, 1.0, TimeSpan.FromMilliseconds(380))
+            {
+                EasingFunction = new BackEase { EasingMode = EasingMode.EaseOut, Amplitude = 0.6 }
+            };
+
+            BdrSimpleSuccessCard.BeginAnimation(UIElement.OpacityProperty, fadeIn);
+            ScaleSimpleSuccessCard.BeginAnimation(ScaleTransform.ScaleXProperty, scaleUp);
+            ScaleSimpleSuccessCard.BeginAnimation(ScaleTransform.ScaleYProperty, scaleUp);
+            ScaleSuccessCheckBadge.BeginAnimation(ScaleTransform.ScaleXProperty, badgePop);
+            ScaleSuccessCheckBadge.BeginAnimation(ScaleTransform.ScaleYProperty, badgePop);
+        }
+
         private void Nav_Click(object sender, RoutedEventArgs e)
         {
             if (sender is not Button btn || btn.Tag is not string tag) return;
@@ -1282,6 +1553,7 @@ namespace Qovx
             bool scanDuplicates = ChkUpdateCache.IsChecked == true;
             bool scanD3dCache = ChkThumbnails.IsChecked == true;
             bool scanBrowsers = ChkBrowserCache.IsChecked == true;
+            bool scanCrashDumps = ChkCrashDumps.IsChecked == true;
 
             _diskCts?.Cancel();
             _diskCts?.Dispose();
@@ -1323,6 +1595,9 @@ namespace Qovx
 
                     if (scanBrowsers && !token.IsCancellationRequested)
                         totalCacheBytes += GetBrowserCachesSizeSafe(token, out runningBrowsers);
+
+                    if (scanCrashDumps && !token.IsCancellationRequested)
+                        totalCacheBytes += GetCrashDumpsSizeSafe(token);
 
                     if (scanDuplicates && !token.IsCancellationRequested)
                     {
@@ -1415,6 +1690,7 @@ namespace Qovx
             bool cleanWinTemp = ChkWinTemp.IsChecked == true;
             bool cleanD3dCache = ChkThumbnails.IsChecked == true;
             bool cleanBrowsers = ChkBrowserCache.IsChecked == true;
+            bool cleanCrashDumps = ChkCrashDumps.IsChecked == true;
 
             if (cleanWinTemp)
             {
@@ -1457,6 +1733,8 @@ namespace Qovx
                     if (cleanWinTemp) dirsToClean.Add(GetWindowsTempDirectoryPath());
                     if (cleanD3dCache)
                         dirsToClean.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "D3DSCache"));
+                    if (cleanCrashDumps)
+                        dirsToClean.AddRange(GetCrashDumpDirectories());
 
                     if (cleanBrowsers)
                     {
@@ -1673,7 +1951,7 @@ namespace Qovx
 
             if (SendFileToRecycleBin(targetRecord.DuplicatePath))
             {
-                // Note: Moved to Recycle Bin; disk space will be reclaimed once Recycle Bin is emptied (ChatGPT 2B fix)
+                // Note: Moved to Recycle Bin; disk space will be reclaimed once Recycle Bin is emptied
                 _foundDuplicates.Remove(targetRecord);
                 _lastDuplicatePotentialBytes = _foundDuplicates.Sum(x => x.SizeBytes);
                 RenderDuplicateListBox();
@@ -2425,18 +2703,79 @@ namespace Qovx
         /// <summary>
         /// Inspects HKCU/HKLM Run, RunOnce, and User/Common Startup folders in strictly Read-Only mode (Section 9).
         /// </summary>
+        private static string GetDisabledStartupBackupPath()
+        {
+            return Path.Combine(App.GetAppDataDirectory(), "startup_disabled_backup_v1.json");
+        }
+
+        private static Dictionary<string, string> LoadDisabledStartupMap()
+        {
+            string path = GetDisabledStartupBackupPath();
+            if (!File.Exists(path))
+                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                string json = File.ReadAllText(path, Encoding.UTF8);
+                return JsonSerializer.Deserialize<Dictionary<string, string>>(json)
+                       ?? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            }
+            catch
+            {
+                return new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            }
+        }
+
+        private static void SaveDisabledStartupMap(Dictionary<string, string> map)
+        {
+            try
+            {
+                string json = JsonSerializer.Serialize(map, new JsonSerializerOptions { WriteIndented = true });
+                File.WriteAllText(GetDisabledStartupBackupPath(), json, Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                App.LogDiagnosticEvent("STARTUP_BACKUP_SAVE", ex.Message);
+            }
+        }
+
         private void RefreshStartupAppsList()
         {
             try
             {
+                _startupEntries.Clear();
                 LstStartupApps.Items.Clear();
-                ReadRunRegistryKey(Registry.CurrentUser, @"Software\Microsoft\Windows\CurrentVersion\Run", "HKCU Run");
-                ReadRunRegistryKey(Registry.LocalMachine, @"Software\Microsoft\Windows\CurrentVersion\Run", "HKLM Run");
-                ReadRunRegistryKey(Registry.CurrentUser, @"Software\Microsoft\Windows\CurrentVersion\RunOnce", "HKCU RunOnce");
-                ReadRunRegistryKey(Registry.LocalMachine, @"Software\Microsoft\Windows\CurrentVersion\RunOnce", "HKLM RunOnce");
+
+                ReadRunRegistryKey(Registry.CurrentUser, @"Software\Microsoft\Windows\CurrentVersion\Run", "HKCU Run", isHkcuRun: true);
+                ReadRunRegistryKey(Registry.LocalMachine, @"Software\Microsoft\Windows\CurrentVersion\Run", "HKLM Run", isHkcuRun: false);
+                ReadRunRegistryKey(Registry.CurrentUser, @"Software\Microsoft\Windows\CurrentVersion\RunOnce", "HKCU RunOnce", isHkcuRun: false);
+                ReadRunRegistryKey(Registry.LocalMachine, @"Software\Microsoft\Windows\CurrentVersion\RunOnce", "HKLM RunOnce", isHkcuRun: false);
 
                 ReadStartupFolderEntries(Environment.GetFolderPath(Environment.SpecialFolder.Startup), "User Startup");
                 ReadStartupFolderEntries(Environment.GetFolderPath(Environment.SpecialFolder.CommonStartup), "Common Startup");
+
+                var disabledMap = LoadDisabledStartupMap();
+                foreach (var kvp in disabledMap)
+                {
+                    if (_startupEntries.Any(x => x.IsHkcuRun && string.Equals(x.Name, kvp.Key, StringComparison.OrdinalIgnoreCase)))
+                        continue;
+                    var rec = new StartupEntryRecord
+                    {
+                        Scope = "HKCU Run",
+                        Name = kvp.Key,
+                        Command = kvp.Value,
+                        IsHkcuRun = true,
+                        IsEnabled = false
+                    };
+                    _startupEntries.Add(rec);
+                }
+
+                foreach (var item in _startupEntries)
+                {
+                    string stateTag = item.IsEnabled
+                        ? (_isEnglish ? "ACTIVE" : "AKTİF")
+                        : (_isEnglish ? "PAUSED" : "DURAKLATILDI");
+                    LstStartupApps.Items.Add($"[{stateTag,-12}] [{item.Scope,-12}]  {item.Name,-24} -> {item.Command}");
+                }
 
                 if (LstStartupApps.Items.Count == 0)
                 {
@@ -2444,6 +2783,10 @@ namespace Qovx
                         ? "No startup entries found in Registry Run/RunOnce or Startup folders."
                         : "Kayıt defteri Run/RunOnce anahtarlarında veya Başlangıç klasörlerinde öğe bulunamadı.");
                 }
+
+                TxtSimplePillStartup.Text = _isEnglish
+                    ? $"Startup Apps: {_startupEntries.Count(x => x.IsEnabled)} Active"
+                    : $"Başlangıç Öğesi: {_startupEntries.Count(x => x.IsEnabled)} Aktif";
             }
             catch (Exception ex)
             {
@@ -2451,7 +2794,7 @@ namespace Qovx
             }
         }
 
-        private void ReadRunRegistryKey(RegistryKey root, string subKeyPath, string scopeLabel)
+        private void ReadRunRegistryKey(RegistryKey root, string subKeyPath, string scopeLabel, bool isHkcuRun)
         {
             try
             {
@@ -2460,7 +2803,14 @@ namespace Qovx
                 foreach (string name in key.GetValueNames())
                 {
                     string val = key.GetValue(name)?.ToString() ?? "";
-                    LstStartupApps.Items.Add($"[{scopeLabel,-14}]  {name,-26} -> {val}");
+                    _startupEntries.Add(new StartupEntryRecord
+                    {
+                        Scope = scopeLabel,
+                        Name = name,
+                        Command = val,
+                        IsHkcuRun = isHkcuRun,
+                        IsEnabled = true
+                    });
                 }
             }
             catch (Exception ex)
@@ -2480,7 +2830,14 @@ namespace Qovx
                     string fileName = Path.GetFileName(file);
                     if (string.Equals(fileName, "desktop.ini", StringComparison.OrdinalIgnoreCase))
                         continue;
-                    LstStartupApps.Items.Add($"[{scopeLabel,-14}]  {fileName,-26} -> {file}");
+                    _startupEntries.Add(new StartupEntryRecord
+                    {
+                        Scope = scopeLabel,
+                        Name = fileName,
+                        Command = file,
+                        IsHkcuRun = false,
+                        IsEnabled = true
+                    });
                 }
             }
             catch (Exception ex)
@@ -2493,6 +2850,123 @@ namespace Qovx
         {
             PlayUiFeedbackSound(false);
             RefreshStartupAppsList();
+        }
+
+        private void BtnToggleStartupItem_Click(object sender, RoutedEventArgs e)
+        {
+            int idx = LstStartupApps.SelectedIndex;
+            if (idx < 0 || idx >= _startupEntries.Count)
+            {
+                TxtPrivResult.Text = _isEnglish
+                    ? "Please select a startup item from the list first."
+                    : "Lütfen önce listeden bir başlangıç uygulaması seçin.";
+                PlayUiFeedbackSound(false);
+                return;
+            }
+
+            var entry = _startupEntries[idx];
+            if (!entry.IsHkcuRun)
+            {
+                TxtPrivResult.Text = _isEnglish
+                    ? $"'{entry.Name}' is in [{entry.Scope}]. For system safety, 1-click pause/resume only modifies Current User (HKCU Run) items."
+                    : $"'{entry.Name}' öğesi [{entry.Scope}] kapsamında. Sistem güvenliği için tek tıkla duraklatma yalnızca Kullanıcı (HKCU Run) öğelerinde uygulanır.";
+                PlayUiFeedbackSound(false);
+                return;
+            }
+
+            try
+            {
+                var disabledMap = LoadDisabledStartupMap();
+                const string runPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
+                using RegistryKey? key = Registry.CurrentUser.CreateSubKey(runPath, writable: true);
+                if (key == null) return;
+
+                if (entry.IsEnabled)
+                {
+                    disabledMap[entry.Name] = entry.Command;
+                    SaveDisabledStartupMap(disabledMap);
+                    key.DeleteValue(entry.Name, throwOnMissingValue: false);
+                    TxtPrivResult.Text = _isEnglish
+                        ? $"Startup item '{entry.Name}' paused and backed up locally. Click again anytime to re-enable."
+                        : $"'{entry.Name}' başlangıç öğesi duraklatıldı ve yerel yedeğe alındı. İstediğiniz zaman tekrar etkinleştirebilirsiniz.";
+                }
+                else
+                {
+                    key.SetValue(entry.Name, entry.Command, RegistryValueKind.String);
+                    disabledMap.Remove(entry.Name);
+                    SaveDisabledStartupMap(disabledMap);
+                    TxtPrivResult.Text = _isEnglish
+                        ? $"Startup item '{entry.Name}' restored to HKCU Run."
+                        : $"'{entry.Name}' başlangıç öğesi tekrar etkinleştirildi.";
+                }
+
+                RefreshStartupAppsList();
+                PlayUiFeedbackSound(true);
+            }
+            catch (Exception ex)
+            {
+                App.LogDiagnosticEvent("STARTUP_TOGGLE", ex.Message);
+                TxtPrivResult.Text = _isEnglish
+                    ? $"Failed to toggle startup item: {ex.Message}"
+                    : $"Başlangıç öğesi değiştirilemedi: {ex.Message}";
+            }
+        }
+
+        private async void BtnAuditScheduledTasks_Click(object sender, RoutedEventArgs e)
+        {
+            BtnAuditScheduledTasks.IsEnabled = false;
+            PlayUiFeedbackSound(false);
+            TxtPrivResult.Text = _isEnglish
+                ? "Auditing non-OS scheduled tasks in Windows Task Scheduler..."
+                : "Windows Görev Zamanlayıcısı üzerindeki üçüncü taraf görevler denetleniyor...";
+
+            try
+            {
+                var tasks = await Task.Run(() =>
+                {
+                    var found = new List<string>();
+                    string tasksRoot = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Windows), "System32", "Tasks");
+                    if (!Directory.Exists(tasksRoot)) return found;
+
+                    var opts = new EnumerationOptions
+                    {
+                        IgnoreInaccessible = true,
+                        RecurseSubdirectories = true,
+                        ReturnSpecialDirectories = false
+                    };
+                    foreach (string file in Directory.EnumerateFiles(tasksRoot, "*", opts))
+                    {
+                        string rel = Path.GetRelativePath(tasksRoot, file);
+                        if (rel.StartsWith("Microsoft" + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                            continue;
+                        found.Add(rel);
+                    }
+                    return found;
+                });
+
+                _lastAuditedTasksCount = tasks.Count;
+                LstStartupApps.Items.Add("--------------------------------------------------------------------------------");
+                LstStartupApps.Items.Add(_isEnglish
+                    ? $"[TASK SCHEDULER AUDIT] {tasks.Count} non-Microsoft scheduled task(s) detected:"
+                    : $"[GÖREV ZAMANLAYICISI DENETİMİ] {tasks.Count} adet üçüncü taraf zamanlanmış görev tespit edildi:");
+                foreach (string t in tasks.Take(40))
+                {
+                    LstStartupApps.Items.Add($"[SCHEDULED TASK]  {t}");
+                }
+
+                TxtPrivResult.Text = _isEnglish
+                    ? $"Task Scheduler Audit Complete: {_lastAuditedTasksCount} third-party scheduled task(s) listed below."
+                    : $"Görev Zamanlayıcısı Denetimi Tamamlandı: {_lastAuditedTasksCount} adet üçüncü taraf görev listeye eklendi.";
+                PlayUiFeedbackSound(true);
+            }
+            catch (Exception ex)
+            {
+                App.LogDiagnosticEvent("TASK_AUDIT", ex.Message);
+            }
+            finally
+            {
+                BtnAuditScheduledTasks.IsEnabled = true;
+            }
         }
 
         private static string GetPrivacyBackupFilePath()
@@ -2632,7 +3106,7 @@ namespace Qovx
         {
             var store = LoadPrivacyBackupStore(out bool corruptBackup);
 
-            // STEP 1: Pre-capture all snapshots BEFORE making any changes (ChatGPT 2C fix)
+            // STEP 1: Pre-capture all snapshots BEFORE making any changes
             var targets = new List<(string Id, string SubKeyPath, string ValueName, int TargetVal)>();
             if (ChkAdId.IsChecked == true)
                 targets.Add(("AdId", @"Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo", "Enabled", 0));
@@ -2801,6 +3275,85 @@ namespace Qovx
             TxtPrivResult.Text = _isEnglish
                 ? $"State Restored: {restoredCount} Registry value(s) restored & verified ({skippedExternalCount} external kept, {failedCount} failed)."
                 : $"Durum Geri Yüklendi: {restoredCount} kayıt defteri değeri geri yüklendi ve doğrulandı ({skippedExternalCount} harici korundu, {failedCount} başarısız).";
+        }
+
+        private void BtnVisualBestPerf_Click(object sender, RoutedEventArgs e)
+        {
+            var store = LoadPrivacyBackupStore(out _);
+            var targets = new List<(string Id, string SubKeyPath, string ValueName, int TargetVal)>
+            {
+                ("VisualFX", @"Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects", "VisualFXSetting", 2),
+                ("Transparency", @"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "EnableTransparency", 0),
+                ("TaskbarAnim", @"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarAnimations", 0)
+            };
+
+            foreach (var t in targets)
+            {
+                CaptureBaselineSnapshotIfMissing(store, t.Id, t.SubKeyPath, t.ValueName);
+                if (store.Snapshots.TryGetValue(t.Id, out var sObj)) sObj.AppliedTargetValue = t.TargetVal;
+            }
+
+            if (!SavePrivacyBackupStoreVerified(store))
+            {
+                TxtPowerStatus.Text = _isEnglish
+                    ? "Could not verify backup file before applying visual performance settings."
+                    : "Görsel performans ayarları uygulanmadan önce yedek dosyası doğrulanamadı.";
+                return;
+            }
+
+            int applied = 0;
+            foreach (var t in targets)
+            {
+                try
+                {
+                    using RegistryKey key = Registry.CurrentUser.CreateSubKey(t.SubKeyPath, writable: true);
+                    if (key != null)
+                    {
+                        key.SetValue(t.ValueName, t.TargetVal, RegistryValueKind.DWord);
+                        applied++;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    App.LogDiagnosticEvent("VISUAL_PERF", ex.Message);
+                }
+            }
+
+            TxtPowerStatus.Text = _isEnglish
+                ? $"Best Performance Visual Mode Active ({applied}/3 settings applied & backed up; heavy transparency and taskbar animations disabled)."
+                : $"En İyi Performans Görsel Modu Etkin ({applied}/3 ayar yedeklenerek uygulandı; saydamlık ve görev çubuğu animasyonları kapatıldı).";
+            PlayUiFeedbackSound(true);
+        }
+
+        private void BtnVisualRestoreDefault_Click(object sender, RoutedEventArgs e)
+        {
+            var store = LoadPrivacyBackupStore(out _);
+            var targets = new List<(string SubKeyPath, string ValueName, int DefaultVal)>
+            {
+                (@"Software\Microsoft\Windows\CurrentVersion\Explorer\VisualEffects", "VisualFXSetting", 0),
+                (@"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "EnableTransparency", 1),
+                (@"Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced", "TaskbarAnimations", 1)
+            };
+
+            foreach (var t in targets)
+            {
+                try
+                {
+                    using RegistryKey key = Registry.CurrentUser.CreateSubKey(t.SubKeyPath, writable: true);
+                    key?.SetValue(t.ValueName, t.DefaultVal, RegistryValueKind.DWord);
+                }
+                catch { }
+            }
+
+            store.Snapshots.Remove("VisualFX");
+            store.Snapshots.Remove("Transparency");
+            store.Snapshots.Remove("TaskbarAnim");
+            SavePrivacyBackupStoreVerified(store);
+
+            TxtPowerStatus.Text = _isEnglish
+                ? "Windows visual effects and transparency restored to default appearance."
+                : "Windows görsel efektleri ve saydamlık ayarları varsayılan görünüm kalitesine döndürüldü.";
+            PlayUiFeedbackSound(true);
         }
 
         private void BtnOpenStartup_Click(object sender, RoutedEventArgs e)
@@ -3076,6 +3629,7 @@ namespace Qovx
         {
             if (_isEnglish)
             {
+                TxtModeSwitch.Text = _isProMode ? "⚡ Switch to Simple Mode" : "🛠️ Switch to Pro Mode";
                 TxtPinTop.Text = this.Topmost ? "📌 Pin Top: ON" : "📌 Pin Top: OFF";
                 TxtSoundLabel.Text = _isSoundEnabled ? "🔊 Sound: ON" : "🔇 Sound: OFF";
                 TxtThemeLabel.Text = _isLightTheme ? "☀️ Theme: Light" : "🌙 Theme: Dark";
@@ -3083,6 +3637,7 @@ namespace Qovx
             }
             else
             {
+                TxtModeSwitch.Text = _isProMode ? "⚡ Basit Mod (Akıllı)'ya Dön" : "🛠️ Gelişmiş Mod (Pro)'ya Geç";
                 TxtPinTop.Text = this.Topmost ? "📌 Üstte Tut: Açık" : "📌 Üstte Tut: Kapalı";
                 TxtSoundLabel.Text = _isSoundEnabled ? "🔊 Ses: Açık" : "🔇 Ses: Kapalı";
                 TxtThemeLabel.Text = _isLightTheme ? "☀️ Tema: Açık" : "🌙 Tema: Koyu";
@@ -3096,7 +3651,18 @@ namespace Qovx
 
             if (_isEnglish)
             {
-                TxtHeaderSubtitle.Text = "System & Network Control Suite v3.0.2";
+                TxtHeaderSubtitle.Text = "Performance & System Control Center v4.0.1";
+                TxtSimpleBadge.Text = "⚡ SMART OPTIMIZATION CENTER • 100% LOCAL ARCHITECTURE";
+                TxtSimpleHeroState.Text = "Your system is optimized and responsive";
+                TxtSimpleHeroSub.Text = "Safely optimize application caches, crash dumps, inactive memory pages, and startup load with a single click.";
+                TxtBtnSimpleBoostMain.Text = "OPTIMIZE";
+                TxtBtnSimpleBoostSub.Text = "SYSTEM";
+                ChkCrashDumps.Content = "Application Crash Dumps (CrashDumps & WER Reports)";
+                TxtBtnToggleStartupItem.Text = "Pause / Resume Selected Startup Item";
+                TxtBtnAuditScheduledTasks.Text = "Audit Scheduled Tasks";
+                TxtVisualPerfHeader.Text = "Visual Performance Tweaks (UI & Animation Acceleration)";
+                TxtBtnVisualBestPerf.Text = "Enable Best Performance Mode (Disable Heavy Effects)";
+                TxtBtnVisualRestoreDefault.Text = "Restore Default Visual Quality";
                 TxtZeroTelemetry.Text = "● Zero Data Collection • User-Initiated DNS/Web Only";
                 NavTxtDash.Text = "System Overview & Boost";
                 NavTxtRam.Text = "Memory (RAM) Manager";
@@ -3176,12 +3742,23 @@ namespace Qovx
                 TxtBtnShutdown120.Text = "Shutdown in 120 Min";
                 TxtBtnCancelShutdown.Text = "Cancel Shutdown Timer";
 
-                TxtFooterLeft.Text = "QOVX v3.0.2 • Publisher: ALLAHVERDİ CAN • 100% Local Architecture";
+                TxtFooterLeft.Text = "QOVX v4.0.1.1 • Publisher: ALLAHVERDİ CAN • 100% Local Architecture";
                 TxtFooterRight.Text = "Windows 10 / 11 x64 Native (.NET 10 LTS)";
             }
             else
             {
-                TxtHeaderSubtitle.Text = "System & Network Control Suite v3.0.2";
+                TxtHeaderSubtitle.Text = "Performans & Sistem Kontrol Merkezi v4.0.1";
+                TxtSimpleBadge.Text = "⚡ AKILLI OPTİMİZASYON MERKEZİ • %100 YEREL MİMARİ";
+                TxtSimpleHeroState.Text = "Sisteminiz optimize ve akıcı";
+                TxtSimpleHeroSub.Text = "Tek dokunuşla uygulama önbelleklerini, çökme dökümlerini, pasif bellek sayfalarını ve başlangıç yükünü güvenle optimize edin.";
+                TxtBtnSimpleBoostMain.Text = "SİSTEMİ";
+                TxtBtnSimpleBoostSub.Text = "OPTİMİZE ET";
+                ChkCrashDumps.Content = "Uygulama Çökme Dökümleri (CrashDumps & WER Raporları)";
+                TxtBtnToggleStartupItem.Text = "Seçili Başlangıç Öğesini Duraklat / Etkinleştir";
+                TxtBtnAuditScheduledTasks.Text = "Görev Zamanlayıcısı Denetimi";
+                TxtVisualPerfHeader.Text = "Görsel Performans Ayarları (Windows Arayüz ve Animasyon Hızlandırma)";
+                TxtBtnVisualBestPerf.Text = "En İyi Performans Moduna Geç (Hantal Efektleri Kapat)";
+                TxtBtnVisualRestoreDefault.Text = "Görsel Efektleri Varsayılan Kaliteye Döndür";
                 TxtZeroTelemetry.Text = "● Sıfır Veri Toplama • Yalnızca Kullanıcı İsteğiyle DNS/Web";
                 NavTxtDash.Text = "Sistem Özeti & Hızlandır";
                 NavTxtRam.Text = "Bellek (RAM) Yönetimi";
@@ -3261,7 +3838,7 @@ namespace Qovx
                 TxtBtnShutdown120.Text = "120 Dk Sonra Kapat";
                 TxtBtnCancelShutdown.Text = "Zamanlayıcıyı İptal Et";
 
-                TxtFooterLeft.Text = "QOVX v3.0.2 • Yayıncı: ALLAHVERDİ CAN • %100 Yerel Mimari";
+                TxtFooterLeft.Text = "QOVX v4.0.1.1 • Yayıncı: ALLAHVERDİ CAN • %100 Yerel Mimari";
                 TxtFooterRight.Text = "Windows 10 / 11 x64 Native (.NET 10 LTS)";
             }
         }

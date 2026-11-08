@@ -8,7 +8,7 @@
   <Identity
     Name="ALLAHVERDCAN.QOVX"
     Publisher="CN=80F86ABB-4ABB-4524-A032-0CE77FF05712"
-    Version="3.0.2.0"
+    Version="4.0.1.0"
     ProcessorArchitecture="x64" />
 
   <Properties>
